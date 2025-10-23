@@ -1,0 +1,117 @@
+[
+    {
+        "id": 1,
+        "name": "Demo Screen Training",
+        "app_name": "ExtractTagApp",
+        "app_package": "com.cd.extracttagapp",
+        "description": "Training flow for demo screen elements",
+        "is_active": true,
+        "created_by_username": "Onkar",
+        "created_at": "2025-08-01T05:37:38.181475Z",
+        "updated_at": "2025-08-01T07:29:50.414728Z",
+        "step_count": 2,
+        "steps": [
+            {
+                "id": 1,
+                "step_number": 1,
+                "step_name": "Extract UI Elements",
+                "screenshot_url": "http://192.168.1.57:5000/media/screenshots/demo_screen_step1.jpg",
+                "screen_info": {
+                    "width": 1080,
+                    "height": 2376
+                },
+                "highlighted_element": {
+                    "tag": "demo_screen.button.extract_action",
+                    "shape": "rounded",
+                    "element_id": "extract_action",
+                    "element_bounds": {
+                        "size": {
+                            "width": 120,
+                            "height": 48
+                        },
+                        "position": {
+                            "x": 480,
+                            "y": 100
+                        }
+                    }
+                },
+                "instructions": [
+                    "Tap this button to extract UI elements from the current screen",
+                    "The system will analyze all tagged elements and show their properties"
+                ]
+            },
+            {
+                "id": 2,
+                "step_number": 2,
+                "step_name": "View Results",
+                "screenshot_url": "http://192.168.1.57:5000/media/screenshots/demo_screen_step2.jpg",
+                "screen_info": {
+                    "width": 1080,
+                    "height": 2376
+                },
+                "highlighted_element": {
+                    "tag": "demo_screen.button.fab",
+                    "shape": "circle",
+                    "element_id": "fab",
+                    "element_bounds": {
+                        "size": {
+                            "width": 56,
+                            "height": 56
+                        },
+                        "position": {
+                            "x": 800,
+                            "y": 600
+                        }
+                    }
+                },
+                "instructions": [
+                    "After extraction, use this floating action button to view the extracted elements",
+                    "You can see detailed information about each UI component"
+                ]
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Layout Test Screen Training",
+        "app_name": "ExtractTagApp",
+        "app_package": "com.cd.extracttagapp",
+        "description": "Training flow for layout test screen",
+        "is_active": true,
+        "created_by_username": "Onkar",
+        "created_at": "2025-08-01T05:37:38.181475Z",
+        "updated_at": "2025-08-01T07:29:50.414728Z",
+        "step_count": 1,
+        "steps": [
+            {
+                "id": 3,
+                "step_number": 1,
+                "step_name": "Explore Layout Elements",
+                "screenshot_url": "http://192.168.1.57:5000/media/screenshots/layout_test_step1.jpg",
+                "screen_info": {
+                    "width": 1080,
+                    "height": 2376
+                },
+                "highlighted_element": {
+                    "tag": "layout_test_screen.list_item.lazy_list_item_item_1",
+                    "shape": "rounded",
+                    "element_id": "lazy_list_item_item_1",
+                    "element_bounds": {
+                        "size": {
+                            "width": 888,
+                            "height": 192
+                        },
+                        "position": {
+                            "x": 96,
+                            "y": 1704
+                        }
+                    }
+                },
+                "instructions": [
+                    "This is a list item in the layout test screen",
+                    "Try interacting with different elements to see how they are tagged"
+                ]
+            }
+        ]
+    }
+]
