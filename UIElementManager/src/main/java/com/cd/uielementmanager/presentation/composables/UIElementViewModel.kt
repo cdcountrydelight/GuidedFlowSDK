@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
 import android.view.View
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Rect
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.ViewModel
@@ -13,7 +14,7 @@ import com.cd.uielementmanager.data.network.HttpClientManager
 import com.cd.uielementmanager.domain.contents.BoundsContent
 import com.cd.uielementmanager.domain.contents.PositionContent
 import com.cd.uielementmanager.domain.contents.SizeContent
-import com.cd.uielementmanager.domain.contents.TrainingFlowContent
+import com.cd.uielementmanager.domain.contents.TrainingStepContent
 import com.cd.uielementmanager.domain.contents.UIElementContent
 import com.cd.uielementmanager.domain.domain_utils.AppErrorCodes
 import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
@@ -59,29 +60,28 @@ class UIElementViewModel() : ViewModel() {
 
     // Training flow state management
     private val _trainingFlowStateFlow =
-        MutableStateFlow<DataUiResponseStatus<TrainingFlowContent>>(
-            DataUiResponseStatus.none()
-        )
+        MutableStateFlow<DataUiResponseStatus<Unit>>(DataUiResponseStatus.none())
     val trainingFlowState = _trainingFlowStateFlow.asStateFlow()
 
     // Current training step index
     private val _currentStepIndex = MutableStateFlow(0)
+
     val currentStepIndex = _currentStepIndex.asStateFlow()
 
     private var currentScreen: String? = null
 
     private val flowId: Int? = -1
 
-    private var trainingFlowResponseMap = mutableMapOf<String, List<TrainingFlowContent>>()
+    private var trainingFlowResponseMap = mutableMapOf<String, List<TrainingStepContent>>()
+
+    var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
 
     fun setCurrentScreen(screen: String) {
         val previousScreen = currentScreen
-        val currentStep = trainingFlowResponseMap[screen]?.firstOrNull()
-        if (currentStep != null) {
-            viewModelScope.launch {
-                delay(1000)
-                _trainingFlowStateFlow.value = DataUiResponseStatus.success(currentStep)
-            }
+        viewModelScope.launch {
+            delay(200)
+            currentScreenStepsList.clear()
+            currentScreenStepsList.addAll(trainingFlowResponseMap[screen] ?: arrayListOf())
         }
         if (previousScreen != null && previousScreen != screen) {
             clearElementsForScreen(previousScreen)
@@ -302,18 +302,16 @@ class UIElementViewModel() : ViewModel() {
                     .mapToDataUiResponseStatus()
                 // Reset step index when new flow is loaded
                 if (response is DataUiResponseStatus.Success) {
-                    val responseMap = response.data.flatMap { flow ->
-                        flow.steps.map { step -> step.screenName to flow }
-                    }.groupBy(
-                        keySelector = { it.first },
-                        valueTransform = { it.second }
-                    )
+                    val responseMap = response.data
+                        .flatMap { it.steps }         // all steps from all flows
+                        .groupBy { it.screenName }
                     trainingFlowResponseMap.clear()
                     trainingFlowResponseMap.putAll(responseMap)
                     _currentStepIndex.value = 0
                 } else {
                     _currentStepIndex.value = -1
                 }
+                _trainingFlowStateFlow.value = DataUiResponseStatus.success(Unit)
             } catch (exception: Exception) {
                 _trainingFlowStateFlow.value = DataUiResponseStatus.failure(
                     exception.localizedMessage ?: exception.message ?: "",
@@ -327,11 +325,8 @@ class UIElementViewModel() : ViewModel() {
      * Navigate to next training step
      */
     fun nextTrainingStep() {
-        val flow = (_trainingFlowStateFlow.value as? DataUiResponseStatus.Success)?.data
-        flow?.let {
-            _currentStepIndex.update { current ->
-                if (current < it.steps.size - 1) current + 1 else current
-            }
+        _currentStepIndex.update { current ->
+            if (current < currentScreenStepsList.size - 1) current + 1 else current
         }
     }
 

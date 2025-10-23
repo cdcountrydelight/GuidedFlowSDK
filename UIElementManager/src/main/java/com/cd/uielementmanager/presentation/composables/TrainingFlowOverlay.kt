@@ -78,9 +78,8 @@ import kotlin.math.min
 fun TrainingFlowOverlay(viewModel: UIElementViewModel, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val ttsManager = remember { TextToSpeechManager(context) }
-
     Box(modifier = modifier) {
-        HandleTrainingFlowStateFlow(viewModel, ttsManager)
+        StepDetails(viewModel,viewModel.currentScreenStepsList,ttsManager)
     }
 
     DisposableEffect(ttsManager) {
@@ -90,41 +89,41 @@ fun TrainingFlowOverlay(viewModel: UIElementViewModel, modifier: Modifier = Modi
     }
 }
 
-@Composable
-private fun HandleTrainingFlowStateFlow(
-    viewModel: UIElementViewModel,
-    ttsManager: TextToSpeechManager
-) {
-    val context = LocalContext.current
-    var isErrorResponseHandled by remember {
-        mutableStateOf(false)
-    }
-    when (val response = viewModel.trainingFlowState.collectAsStateWithLifecycle().value) {
-        is DataUiResponseStatus.Loading -> {
-            LoadingSection()
-            isErrorResponseHandled = false
-        }
-
-        is DataUiResponseStatus.Failure -> {
-            if (!isErrorResponseHandled) {
-                ErrorAlertDialog(
-                    context.getErrorMessage(response.errorMessage, response.errorCode),
-                    positiveButton = ButtonHandlerBean(stringResource(R.string.dismiss), {
-                        isErrorResponseHandled = true
-                    })
-                )
-            }
-        }
-
-        is DataUiResponseStatus.Success -> {
-            StepDetails(viewModel, response.data.steps, ttsManager)
-        }
-
-        is DataUiResponseStatus.None -> {
-            // no need to handle it
-        }
-    }
-}
+//@Composable
+//private fun HandleTrainingFlowStateFlow(
+//    viewModel: UIElementViewModel,
+//    ttsManager: TextToSpeechManager
+//) {
+//    val context = LocalContext.current
+//    var isErrorResponseHandled by remember {
+//        mutableStateOf(false)
+//    }
+//    when (val response = viewModel.trainingFlowState.collectAsStateWithLifecycle().value) {
+//        is DataUiResponseStatus.Loading -> {
+//            LoadingSection()
+//            isErrorResponseHandled = false
+//        }
+//
+//        is DataUiResponseStatus.Failure -> {
+//            if (!isErrorResponseHandled) {
+//                ErrorAlertDialog(
+//                    context.getErrorMessage(response.errorMessage, response.errorCode),
+//                    positiveButton = ButtonHandlerBean(stringResource(R.string.dismiss), {
+//                        isErrorResponseHandled = true
+//                    })
+//                )
+//            }
+//        }
+//
+//        is DataUiResponseStatus.Success -> {
+//            StepDetails(viewModel, response.data.steps, ttsManager)
+//        }
+//
+//        is DataUiResponseStatus.None -> {
+//            // no need to handle it
+//        }
+//    }
+//}
 
 @Composable
 private fun StepDetails(
