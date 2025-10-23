@@ -15,6 +15,7 @@ import com.cd.extracttagapp.screens.SimpleElementsScreen
 import com.cd.extracttagapp.screens.UIElementsScreen
 import com.cd.extracttagapp.ui.theme.ExtractTagAppTheme
 import com.cd.uielementmanager.UIElementTrackingSDK
+import com.cd.uielementmanager.presentation.StartMode
 import com.cd.uielementmanager.presentation.composables.UIElementProvider
 import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 import org.koin.compose.koinInject
@@ -43,7 +44,8 @@ class MainActivity : ComponentActivity(), KoinComponent {
                 UIElementTrackingSDK.startService(
                     this,
                     viewModel,
-                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMjc5MzIwLCJpYXQiOjE3NjExOTI5MjB9.voC-WWGATWkIvSSjC_5YF9F7MdXdsXT0Xzt9PazJ5oY"
+                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMjc5MzIwLCJpYXQiOjE3NjExOTI5MjB9.voC-WWGATWkIvSSjC_5YF9F7MdXdsXT0Xzt9PazJ5oY",
+                    StartMode.Training
                 )
             } else {
                 Toast.makeText(this, "Overlay permission denied", Toast.LENGTH_SHORT).show()

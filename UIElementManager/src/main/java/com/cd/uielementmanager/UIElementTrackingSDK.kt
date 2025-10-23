@@ -7,6 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.net.toUri
 import com.cd.uielementmanager.data.network.HttpClientManager
+import com.cd.uielementmanager.presentation.StartMode
 import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.showToast
 import com.cd.uielementmanager.presentation.utils.ViewModelHelper
@@ -30,6 +31,7 @@ object UIElementTrackingSDK {
         activity: Activity,
         viewModel: UIElementViewModel,
         authToken: String,
+        startMode: StartMode,
         packageName: String? = null
     ) {
         if (!Settings.canDrawOverlays(activity)) {
@@ -41,6 +43,10 @@ object UIElementTrackingSDK {
             HttpClientManager.authToken = authToken
             val intent = Intent(activity, UIElementTrackingService::class.java)
             intent.putExtra("packageName", packageName ?: activity.packageName)
+            intent.putExtra(
+                "showOverLay",
+                startMode == StartMode.Sender || startMode == StartMode.Both
+            )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 activity.startForegroundService(intent)
             } else {

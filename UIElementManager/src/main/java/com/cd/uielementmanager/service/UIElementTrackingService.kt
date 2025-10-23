@@ -59,10 +59,13 @@ class UIElementTrackingService : Service() {
 
             else -> {
                 val packageName = intent?.getStringExtra("packageName") ?: this.packageName
+                val showOverlay = intent?.getBooleanExtra("showOverLay", true) ?: true
                 viewModel.fetchTrainingFlow(this, packageName)
                 instance?.overlayManager?.setPackageName("deliveryapp.countrydelight.in.deliveryapp")
                 startForeground(NOTIFICATION_ID, createNotification())
-                overlayManager.showOverlay()
+                if (showOverlay) {
+                    overlayManager.showOverlay()
+                }
             }
         }
 

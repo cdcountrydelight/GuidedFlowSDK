@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cd.uielementmanager.UIElementTrackingSDK
+import com.cd.uielementmanager.presentation.StartMode
 import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +85,8 @@ fun HomeScreen(
                                     activity,
                                     elementTracker,
                                     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMjc5MzIwLCJpYXQiOjE3NjExOTI5MjB9.voC-WWGATWkIvSSjC_5YF9F7MdXdsXT0Xzt9PazJ5oY",
-                                    "deliveryapp.countrydelight.in.deliveryapp"
+                                    StartMode.Training,
+                                    "deliveryapp.countrydelight.in.deliveryapp",
                                 )
                                 // Update the state after a short delay to check if service started
                                 isServiceRunning = UIElementTrackingSDK.isSDKRunning()
