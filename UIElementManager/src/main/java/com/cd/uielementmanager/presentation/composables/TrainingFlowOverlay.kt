@@ -153,8 +153,7 @@ private fun StepDetails(
                 parseHexColor(currentStep.highlightedElementContent.borderColor) ?: Color.Red
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .clickable(false) {}) {
+                    .fillMaxSize()) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val fullScreenPath = Path().apply {
                         addRect(Rect(0f, 0f, size.width, size.height))
@@ -181,6 +180,7 @@ private fun StepDetails(
                                 color = borderColor,
                                 shape = shape
                             )
+
                             .pointerInput(Unit) {
                                 detectTapGestures { offset ->
                                     sendTouchToUnderlyingView(

@@ -70,8 +70,6 @@ class UIElementViewModel() : ViewModel() {
 
     private var currentScreen: String? = null
 
-    private val flowId: Int? = -1
-
     private var trainingFlowResponseMap = mutableMapOf<String, List<TrainingStepContent>>()
 
     var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
@@ -147,44 +145,7 @@ class UIElementViewModel() : ViewModel() {
             return
         }
         _sendUiElementsStateFlow.value = DataUiResponseStatus.loading()
-
         viewModelScope.launch {
-            val screenshotFile = captureScreenshot(rootView, context)
-            val screenshotPart = MultipartBody.Part.createFormData(
-                "screenshot",
-                screenshotFile.name,
-                screenshotFile.asRequestBody("image/png".toMediaTypeOrNull())
-            )
-
-            val screenNamePart =
-                currentScreen.toRequestBody("text/plain".toMediaType())
-
-            val timestampPart =
-                System.currentTimeMillis().toString()
-                    .toRequestBody("text/plain".toMediaType())
-            val screenInfoPart = createScreenInfo(context)
-
-            val guidedFlowElements = getTrackedElements().values.toList()
-            val elementsJson = Gson().toJson(guidedFlowElements)
-            val elementsPart =
-                elementsJson.toRequestBody("text/plain".toMediaType())
-
-            val sendUIElementsUseCase = SendUIElementsUseCase()
-            val response = sendUIElementsUseCase.invoke(
-                flowId = flowId,
-                screenshotPart,
-                screenNamePart,
-                timestampPart,
-                screenInfoPart,
-                elementsPart,
-                context
-            ).mapToDataUiResponseStatus()
-
-            if (response is DataUiResponseStatus.Success) {
-                screenshotFile.delete()
-            }
-            response
-
             _sendUiElementsStateFlow.value = try {
                 val sendPackageNameUseCase = SendPackageNameUseCase()
                 val response = sendPackageNameUseCase.invoke(packageName, context)
@@ -199,7 +160,6 @@ class UIElementViewModel() : ViewModel() {
                     is DataResponseStatus.Success -> {
                         val flowId = response.data.flowId
                         Log.d("FlowID", "sendUIElements: $flowId")
-
                         if (flowId == null) {
                             DataUiResponseStatus.Companion.failure(
                                 "Flow id can't be null",
