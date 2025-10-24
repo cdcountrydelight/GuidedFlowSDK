@@ -1,17 +1,11 @@
 package com.cd.uielementmanager.presentation.composables
 
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
-import android.view.MotionEvent
-import android.view.View
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,9 +30,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
@@ -54,7 +50,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
@@ -63,19 +58,21 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cd.uielementmanager.domain.contents.HighlightedElementContent
 import com.cd.uielementmanager.domain.contents.TrainingStepContent
 import com.cd.uielementmanager.domain.contents.UIElementContent
+import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.TextToSpeechManager
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.min
 
 @Composable
-fun TrainingFlowOverlay(viewModel: UIElementViewModel, modifier: Modifier = Modifier) {
+fun TrainingFlowOverlay(
+    viewModel: UIElementViewModel,
+    modifier: Modifier = Modifier,
+    onDataLoadError: (() -> Unit)? = null
+) {
     val context = LocalContext.current
     val ttsManager = remember { TextToSpeechManager(context) }
-    Box(modifier = modifier) {
-        StepDetails(viewModel, viewModel.currentScreenStepsList, ttsManager)
-    }
-
+    HandleTrainingFowResponse(viewModel, ttsManager, modifier, onDataLoadError)
     DisposableEffect(ttsManager) {
         onDispose {
             ttsManager.shutdown()
@@ -84,12 +81,62 @@ fun TrainingFlowOverlay(viewModel: UIElementViewModel, modifier: Modifier = Modi
 }
 
 @Composable
+private fun HandleTrainingFowResponse(
+    viewModel: UIElementViewModel,
+    ttsManager: TextToSpeechManager,
+    modifier: Modifier,
+    onDataLoadError: (() -> Unit)?
+) {
+    val responseStateFlow = viewModel.trainingFlowState.collectAsStateWithLifecycle().value
+    var isResponseHandled by remember { mutableStateOf(false) }
+    when (responseStateFlow) {
+        is DataUiResponseStatus.Failure -> {
+            if (!isResponseHandled) {
+                onDataLoadError?.invoke()
+                isResponseHandled = true
+            }
+        }
+
+        is DataUiResponseStatus.Loading -> {
+            LoadingSection()
+            isResponseHandled = false
+        }
+
+        is DataUiResponseStatus.None -> {
+
+        }
+
+        is DataUiResponseStatus.Success -> {
+            StepDetails(viewModel, viewModel.currentScreenStepsList, ttsManager, modifier)
+        }
+    }
+}
+
+fun isInsideCutoutArea(
+    position: Offset,
+    elementToHighlight: UIElementContent,
+    density: Density
+): Boolean {
+    val elementLeft = elementToHighlight.bounds.position.x
+    val elementTop = elementToHighlight.bounds.position.y
+    val elementRight = elementLeft + elementToHighlight.bounds.size.width
+    val elementBottom = elementTop + elementToHighlight.bounds.size.height
+
+    println("Touch at: ${position.x}, ${position.y}")
+    println("Element bounds: left=$elementLeft, top=$elementTop, right=$elementRight, bottom=$elementBottom")
+
+    return position.x >= elementLeft && position.x <= elementRight &&
+            position.y >= elementTop && position.y <= elementBottom
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
 private fun StepDetails(
     viewModel: UIElementViewModel,
     steps: List<TrainingStepContent>,
-    ttsManager: TextToSpeechManager
+    ttsManager: TextToSpeechManager,
+    modifier: Modifier
 ) {
-    val context = LocalContext.current
     val currentStepIndex by viewModel.currentStepIndex.collectAsStateWithLifecycle()
     val trackedElements by viewModel.trackedElements.collectAsStateWithLifecycle()
     val density = LocalDensity.current
@@ -97,7 +144,7 @@ private fun StepDetails(
     if (currentStep != null) {
         val currentScreenElements = trackedElements[currentStep.screenName]
         val elementToHighlight =
-            currentScreenElements?.get(currentStep.highlightedElementContent.elementId)
+            currentScreenElements?.get("back_button")
         if (elementToHighlight != null) {
             val xDp = with(density) { elementToHighlight.bounds.position.x.toDp() }
             val yDp = with(density) { elementToHighlight.bounds.position.y.toDp() }
@@ -109,10 +156,7 @@ private fun StepDetails(
             val shape = getBorderShape(density, currentStep.highlightedElementContent)
             val borderColor =
                 parseHexColor(currentStep.highlightedElementContent.borderColor) ?: Color.Red
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
+            Box(modifier = modifier.fillMaxSize()) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val fullScreenPath = Path().apply {
                         addRect(Rect(0f, 0f, size.width, size.height))
@@ -139,18 +183,59 @@ private fun StepDetails(
                                 color = borderColor,
                                 shape = shape
                             )
+//                            .pointerInput(Unit) {
+//                                awaitPointerEventScope {
+//                                    while (true) {
+//                                        val event = awaitPointerEvent()
+//
+//                                        // Detect if it’s a tap (down + up within threshold)
+//                                        val pressed = event.changes.firstOrNull()
+//                                        if (pressed != null && pressed.changedToUpIgnoreConsumed()) {
+//                                            // ✅ You can handle your logic here
+//                                            println("Overlay tapped at: ${pressed.position}")
+//
+//                                            // DO NOT call pressed.consume()
+//                                            // this lets the event propagate to underlying composables
+//                                        }
+//                                        // 🛑 DO NOT call
+//                                        // 🛑 DO NOT call event.changes.forEach { it.consume() }
+//                                        // Consuming it stops propagation
+//                                    }
+//                                }
+//                            }
+//                            .pointerInteropFilter { motionEvent ->
+//                                // We will forward the event and still allow compose to handle it if needed.
+//                                // Return true if you want to consume it in Compose, false if not.
+//                                forwardMotionEventToUnderlyingViews(context, motionEvent)
+//                                // IMPORTANT: returning false lets Compose continue to pass the event
+//                                // through (so the touch can reach underlying Compose elements if the overlay
+//                                // doesn't intercept), but we've already forwarded the event manually.
+//                                false
+//                            }
+//                            .pointerInput(Unit) {
+//                                awaitPointerEventScope {
+//                                    while (true) {
+//                                        val event = awaitPointerEvent()
+//                                        val position = event.changes.first().position
+//                                        // Send event manually to underlying view
+//                                        sendTouchToUnderlyingView(context, position)
+//                                        // Don’t consume event
+//                                        event.changes.forEach { it.consume() }
+//                                    }
+//                                }
+//                            }
 
-                            .pointerInput(Unit) {
-                                detectTapGestures { offset ->
-                                    sendTouchToUnderlyingView(
-                                        context = context,
-                                        offset = offset,
-                                        highlightX = xDp,
-                                        highlightY = yDp
-                                    )
-                                    viewModel.nextTrainingStep()
-                                }
-                            }
+//                            .pointerInput(Unit) {
+//                                detectTapGestures { offset ->
+//                                    sendTouchToUnderlyingView(
+//                                        context = context,
+//                                        offset = offset,
+//                                        highlightX = xDp,
+//                                        highlightY = yDp
+//                                    )
+//                                    viewModel.nextTrainingStep()
+//                                }
+//                            }
                     )
                     if (currentStep.instructions.isNotEmpty()) {
                         InstructionsSection(currentStep.instructions, ttsManager)
@@ -161,52 +246,6 @@ private fun StepDetails(
     }
 }
 
-
-fun Context.findActivity(): Activity? {
-    var ctx = this
-    while (ctx is ContextWrapper) {
-        if (ctx is Activity) return ctx
-        ctx = ctx.baseContext
-    }
-    return null
-}
-
-fun sendTouchToUnderlyingView(
-    context: Context,
-    offset: Offset,
-    highlightX: Dp,
-    highlightY: Dp
-) {
-    val activity = context.findActivity() ?: return
-    val rootView: View = activity.window?.decorView?.rootView ?: return
-
-    val density = context.resources.displayMetrics.density
-    val xPx = highlightX.value * density + offset.x
-    val yPx = highlightY.value * density + offset.y
-
-    val downEvent = MotionEvent.obtain(
-        System.currentTimeMillis(),
-        System.currentTimeMillis(),
-        MotionEvent.ACTION_DOWN,
-        xPx,
-        yPx,
-        0
-    )
-    val upEvent = MotionEvent.obtain(
-        System.currentTimeMillis(),
-        System.currentTimeMillis(),
-        MotionEvent.ACTION_UP,
-        xPx,
-        yPx,
-        0
-    )
-
-    rootView.dispatchTouchEvent(downEvent)
-    rootView.dispatchTouchEvent(upEvent)
-
-    downEvent.recycle()
-    upEvent.recycle()
-}
 
 @Composable
 private fun InstructionsSection(instructions: List<String>, ttsManager: TextToSpeechManager) {

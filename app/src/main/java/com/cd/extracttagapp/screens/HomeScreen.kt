@@ -84,7 +84,7 @@ fun HomeScreen(
                                 UIElementTrackingSDK.startService(
                                     activity,
                                     elementTracker,
-                                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMjc5MzIwLCJpYXQiOjE3NjExOTI5MjB9.voC-WWGATWkIvSSjC_5YF9F7MdXdsXT0Xzt9PazJ5oY",
+                                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMzY1OTgxLCJpYXQiOjE3NjEyNzk1ODF9.2jurE3TB9sPGJ8-n4IxWRBDNiJr3VXkQg9Uz6-Y01es",
                                     StartMode.Both,
                                     "deliveryapp.countrydelight.in.deliveryapp",
                                 )

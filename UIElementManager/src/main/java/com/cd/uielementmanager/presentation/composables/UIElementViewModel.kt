@@ -3,7 +3,6 @@ package com.cd.uielementmanager.presentation.composables
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.util.Log
 import android.view.View
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Rect
@@ -50,6 +49,7 @@ class UIElementViewModel() : ViewModel() {
     // State flows for tracked elements - organized by screen name
     private val _trackedElements =
         MutableStateFlow<Map<String, Map<String, UIElementContent>>>(emptyMap())
+
     val trackedElements: StateFlow<Map<String, Map<String, UIElementContent>>> =
         _trackedElements.asStateFlow()
 
@@ -61,6 +61,7 @@ class UIElementViewModel() : ViewModel() {
     // Training flow state management
     private val _trainingFlowStateFlow =
         MutableStateFlow<DataUiResponseStatus<Unit>>(DataUiResponseStatus.none())
+
     val trainingFlowState = _trainingFlowStateFlow.asStateFlow()
 
     // Current training step index
@@ -76,6 +77,7 @@ class UIElementViewModel() : ViewModel() {
 
     fun setCurrentScreen(screen: String) {
         val previousScreen = currentScreen
+        currentScreen = screen
         viewModelScope.launch {
             delay(200)
             currentScreenStepsList.clear()
@@ -84,14 +86,12 @@ class UIElementViewModel() : ViewModel() {
         if (previousScreen != null && previousScreen != screen) {
             clearElementsForScreen(previousScreen)
         }
-        currentScreen = screen
     }
 
     fun clearElementsForScreen(screen: String) {
         _trackedElements.update { screenMap ->
             screenMap - screen
         }
-        // If clearing the current screen, reset the current screen reference
         if (currentScreen == screen) {
             currentScreen = null
         }
@@ -159,7 +159,6 @@ class UIElementViewModel() : ViewModel() {
 
                     is DataResponseStatus.Success -> {
                         val flowId = response.data.flowId
-                        Log.d("FlowID", "sendUIElements: $flowId")
                         if (flowId == null) {
                             DataUiResponseStatus.Companion.failure(
                                 "Flow id can't be null",
