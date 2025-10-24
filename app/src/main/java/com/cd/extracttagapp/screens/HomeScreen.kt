@@ -86,6 +86,7 @@ fun HomeScreen(
                                     elementTracker,
                                     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMzY1OTgxLCJpYXQiOjE3NjEyNzk1ODF9.2jurE3TB9sPGJ8-n4IxWRBDNiJr3VXkQg9Uz6-Y01es",
                                     StartMode.Both,
+                                    false,
                                     "deliveryapp.countrydelight.in.deliveryapp",
                                 )
                                 // Update the state after a short delay to check if service started

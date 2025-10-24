@@ -8,7 +8,6 @@ import android.app.Service
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.cd.uielementmanager.presentation.StartMode
 import com.cd.uielementmanager.presentation.overlay.TrackingOverlayManager
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.ViewModelHelper.viewModel
@@ -60,29 +59,9 @@ class UIElementTrackingService : Service() {
 
             else -> {
                 val packageName = intent?.getStringExtra("packageName") ?: this.packageName
-                val startMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    intent?.getSerializableExtra("startMode", StartMode::class.java)
-                } else {
-                    intent?.getSerializableExtra("startMode") as? StartMode
-                } ?: StartMode.Both
-                instance?.overlayManager?.setPackageName("deliveryapp.countrydelight.in.deliveryapp")
+                instance?.overlayManager?.setPackageName(packageName)
                 startForeground(NOTIFICATION_ID, createNotification())
-                when (startMode) {
-                    StartMode.Sender -> {
-                        overlayManager.showOverlay()
-
-                    }
-
-                    StartMode.Training -> {
-                        viewModel.fetchTrainingFlow(this, packageName)
-
-                    }
-
-                    StartMode.Both -> {
-                        overlayManager.showOverlay()
-                        viewModel.fetchTrainingFlow(this, packageName)
-                    }
-                }
+                overlayManager.showOverlay()
             }
         }
 

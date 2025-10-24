@@ -45,7 +45,8 @@ class MainActivity : ComponentActivity(), KoinComponent {
                     this,
                     viewModel,
                     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMjc5MzIwLCJpYXQiOjE3NjExOTI5MjB9.voC-WWGATWkIvSSjC_5YF9F7MdXdsXT0Xzt9PazJ5oY",
-                    StartMode.Training
+                    StartMode.Training,
+                    false
                 )
             } else {
                 Toast.makeText(this, "Overlay permission denied", Toast.LENGTH_SHORT).show()

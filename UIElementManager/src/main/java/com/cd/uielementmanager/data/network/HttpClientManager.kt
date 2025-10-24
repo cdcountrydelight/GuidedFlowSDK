@@ -19,7 +19,15 @@ internal object HttpClientManager {
     private var apiService: UIElementsApiService? = null
 
 
-    var authToken: String? = null
+    private var authToken: String? = null
+
+    private var isProdEnvironment: Boolean = false
+
+
+    fun initializeDetails(authToken: String, isProdEnvironment: Boolean) {
+        this.authToken = authToken
+        this.isProdEnvironment = isProdEnvironment
+    }
 
     fun getApiService(context: Context): UIElementsApiService {
         return apiService ?: synchronized(this) {
@@ -50,7 +58,7 @@ internal object HttpClientManager {
     private fun createOkHttpClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
             .addInterceptor(getChuckerInterceptor(context))
-            .addInterceptor(AppNetworkInterceptorImpl(context,authToken))
+            .addInterceptor(AppNetworkInterceptorImpl(context, authToken))
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
@@ -74,6 +82,8 @@ internal object HttpClientManager {
         synchronized(this) {
             retrofit = null
             apiService = null
+            authToken = null
+            isProdEnvironment = false
         }
     }
 }

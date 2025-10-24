@@ -32,6 +32,7 @@ object UIElementTrackingSDK {
         viewModel: UIElementViewModel,
         authToken: String,
         startMode: StartMode,
+        isProdEnvironment: Boolean,
         packageName: String? = null
     ) {
         if (!Settings.canDrawOverlays(activity)) {
@@ -40,14 +41,18 @@ object UIElementTrackingSDK {
         if (isSDKRunning()) return
         try {
             ViewModelHelper.viewModel = viewModel
-            HttpClientManager.authToken = authToken
-            val intent = Intent(activity, UIElementTrackingService::class.java)
-            intent.putExtra("packageName", packageName ?: activity.packageName)
-            intent.putExtra("startMode", startMode)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                activity.startForegroundService(intent)
-            } else {
-                activity.startService(intent)
+            HttpClientManager.initializeDetails(authToken, isProdEnvironment)
+            if (startMode == StartMode.Both || startMode == StartMode.Training) {
+                viewModel.fetchTrainingFlow(activity, packageName ?: activity.packageName)
+            }
+            if (startMode == StartMode.Sender || startMode == StartMode.Both) {
+                val intent = Intent(activity, UIElementTrackingService::class.java)
+                intent.putExtra("packageName", packageName ?: activity.packageName)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    activity.startForegroundService(intent)
+                } else {
+                    activity.startService(intent)
+                }
             }
         } catch (e: Exception) {
             activity.showToast("Failed to start tracking service ${e.localizedMessage}")
