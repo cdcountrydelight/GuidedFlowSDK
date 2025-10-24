@@ -191,6 +191,7 @@ internal class TrackingOverlayManager(
             try {
                 overlayView?.visibility = View.GONE
                 callback()
+                delay(200)
             } catch (e: Exception) {
                 context.showToast("Error capturing screenshot: ${e.localizedMessage}")
             } finally {

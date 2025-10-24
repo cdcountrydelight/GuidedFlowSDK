@@ -65,7 +65,6 @@ fun HomeScreen(
             UIElementTrackingSDK.startSenderSDK(
                 activity,
                 elementTracker,
-                authToken,
                 isProdEnv,
                 result.resultCode,
                 result.data,
@@ -107,7 +106,7 @@ fun HomeScreen(
                 Button(
                     onClick = {
                         if (homeScreenViewModel.isSenderSDKStarted) {
-                            UIElementTrackingSDK.stopService(context)
+                            UIElementTrackingSDK.stopSenderSDK(context)
                             homeScreenViewModel.isSenderSDKStarted = false
                         } else {
                             val captureIntent = projectionManager.createScreenCaptureIntent()

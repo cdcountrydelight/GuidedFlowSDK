@@ -22,7 +22,7 @@ internal object HttpClientManager {
 
     private var isProdEnvironment: Boolean = false
 
-    fun initializeDetails(authToken: String, isProdEnvironment: Boolean) {
+    fun initializeDetails(authToken: String?, isProdEnvironment: Boolean) {
         this.authToken = authToken
         this.isProdEnvironment = isProdEnvironment
     }

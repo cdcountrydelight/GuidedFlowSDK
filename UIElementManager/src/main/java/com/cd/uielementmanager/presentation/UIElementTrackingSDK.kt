@@ -16,18 +16,17 @@ object UIElementTrackingSDK {
 
     private const val OVERLAY_PERMISSION_REQUEST_CODE = 1234
 
-
     private fun initializeSDK(
         activity: Activity,
         viewModel: UIElementViewModel,
-        authToken: String,
+        authToken: String?,
         isProdEnvironment: Boolean,
         onSDKInitialized: () -> Unit
     ) {
         if (!Settings.canDrawOverlays(activity)) {
             requestOverlayPermission(activity)
         }
-        if (isSDKRunning()) return
+        if (isSenderSDKRunning()) return
         try {
             ViewModelHelper.viewModel = viewModel
             HttpClientManager.initializeDetails(authToken, isProdEnvironment)
@@ -40,13 +39,12 @@ object UIElementTrackingSDK {
     fun startSenderSDK(
         activity: Activity,
         viewModel: UIElementViewModel,
-        authToken: String,
         isProdEnvironment: Boolean,
         resultCode: Int,
         resultData: Intent?,
         packageName: String? = null
     ) {
-        initializeSDK(activity, viewModel, authToken, isProdEnvironment) {
+        initializeSDK(activity, viewModel, null, isProdEnvironment) {
             val intent = Intent(activity, UIElementTrackingService::class.java)
             intent.putExtra("packageName", packageName ?: activity.packageName)
             intent.putExtra("resultCode", resultCode)
@@ -74,11 +72,11 @@ object UIElementTrackingSDK {
         }
     }
 
-    fun stopService(context: Context) {
+    fun stopSenderSDK(context: Context) {
         context.stopService(Intent(context, UIElementTrackingService::class.java))
     }
 
-    private fun isSDKRunning(): Boolean {
+    fun isSenderSDKRunning(): Boolean {
         return UIElementTrackingService.Companion.isRunning()
     }
 
