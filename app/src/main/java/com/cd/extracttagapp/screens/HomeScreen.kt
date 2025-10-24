@@ -76,9 +76,6 @@ fun HomeScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        elementTracker.clearTrackedElements()
-    }
 
     Scaffold(
         topBar = {

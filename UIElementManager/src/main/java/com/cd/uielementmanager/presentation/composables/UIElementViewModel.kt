@@ -50,32 +50,32 @@ class UIElementViewModel() : ViewModel() {
     private val _trackedElements =
         MutableStateFlow<Map<String, Map<String, UIElementContent>>>(emptyMap())
 
-    val trackedElements: StateFlow<Map<String, Map<String, UIElementContent>>> =
+    internal val trackedElements: StateFlow<Map<String, Map<String, UIElementContent>>> =
         _trackedElements.asStateFlow()
 
     private val _sendUiElementsStateFlow: MutableStateFlow<DataUiResponseStatus<Unit>> =
         MutableStateFlow(DataUiResponseStatus.Companion.none())
 
-    val sendUiElementsStateFlow = _sendUiElementsStateFlow.asStateFlow()
+    internal val sendUiElementsStateFlow = _sendUiElementsStateFlow.asStateFlow()
 
     // Training flow state management
     private val _trainingFlowStateFlow =
         MutableStateFlow<DataUiResponseStatus<Unit>>(DataUiResponseStatus.none())
 
-    val trainingFlowState = _trainingFlowStateFlow.asStateFlow()
+    internal val trainingFlowState = _trainingFlowStateFlow.asStateFlow()
 
     // Current training step index
     private val _currentStepIndex = MutableStateFlow(0)
 
-    val currentStepIndex = _currentStepIndex.asStateFlow()
+    internal val currentStepIndex = _currentStepIndex.asStateFlow()
 
     private var currentScreen: String? = null
 
     private var trainingFlowResponseMap = mutableMapOf<String, List<TrainingStepContent>>()
 
-    var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
+    internal var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
 
-    fun setCurrentScreen(screen: String) {
+    internal fun setCurrentScreen(screen: String) {
         val previousScreen = currentScreen
         currentScreen = screen
         viewModelScope.launch {
@@ -88,7 +88,7 @@ class UIElementViewModel() : ViewModel() {
         }
     }
 
-    fun clearElementsForScreen(screen: String) {
+    internal fun clearElementsForScreen(screen: String) {
         _trackedElements.update { screenMap ->
             screenMap - screen
         }
@@ -108,7 +108,7 @@ class UIElementViewModel() : ViewModel() {
      * @param tag Unique identifier for the UI element
      * @param bounds Complete position and size information
      */
-    fun registerElement(elementScreenName: String, tag: String, bounds: Rect) {
+    internal fun registerElement(elementScreenName: String, tag: String, bounds: Rect) {
         val currentScreenName = currentScreen ?: return
         if (elementScreenName != currentScreenName) {
             return
@@ -130,7 +130,7 @@ class UIElementViewModel() : ViewModel() {
     /**
      * Get tracked elements for the current screen
      */
-    fun getTrackedElements(): Map<String, UIElementContent> {
+    internal fun getTrackedElements(): Map<String, UIElementContent> {
         val screenName = currentScreen ?: return emptyMap()
         return _trackedElements.value[screenName] ?: emptyMap()
     }
@@ -139,7 +139,7 @@ class UIElementViewModel() : ViewModel() {
     /**
      * Extract and send UI data to server using clean architecture
      */
-    fun sendUIElements(context: Context, imageBitmap: Bitmap, packageName: String) {
+    internal fun sendUIElements(context: Context, imageBitmap: Bitmap, packageName: String) {
         val currentScreen = currentScreen
         if (_sendUiElementsStateFlow.value is DataUiResponseStatus.Loading || currentScreen == null) {
             return
@@ -221,23 +221,12 @@ class UIElementViewModel() : ViewModel() {
         return screenInfoJson.toRequestBody("text/plain".toMediaType())
     }
 
-    /**
-     * Clear tracked elements for a specific screen or the current screen
-     * @param screenName Optional screen name to clear. If null, clears current screen
-     */
-    fun clearTrackedElements(screenName: String? = null) {
-        val screen = screenName ?: currentScreen ?: return
-        _trackedElements.update { screenMap ->
-            screenMap - screen
-        }
-        _sendUiElementsStateFlow.value = DataUiResponseStatus.none()
-    }
 
     /**
      * Fetch training flow data from server
      * @param context Application context
      */
-    fun fetchTrainingFlow(context: Context, packageName: String) {
+    internal fun fetchTrainingFlow(context: Context, packageName: String) {
         viewModelScope.launch {
             _trainingFlowStateFlow.value = DataUiResponseStatus.loading()
             try {

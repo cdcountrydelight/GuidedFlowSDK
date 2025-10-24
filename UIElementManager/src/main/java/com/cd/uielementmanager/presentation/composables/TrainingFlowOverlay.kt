@@ -112,23 +112,6 @@ private fun HandleTrainingFowResponse(
     }
 }
 
-fun isInsideCutoutArea(
-    position: Offset,
-    elementToHighlight: UIElementContent,
-    density: Density
-): Boolean {
-    val elementLeft = elementToHighlight.bounds.position.x
-    val elementTop = elementToHighlight.bounds.position.y
-    val elementRight = elementLeft + elementToHighlight.bounds.size.width
-    val elementBottom = elementTop + elementToHighlight.bounds.size.height
-
-    println("Touch at: ${position.x}, ${position.y}")
-    println("Element bounds: left=$elementLeft, top=$elementTop, right=$elementRight, bottom=$elementBottom")
-
-    return position.x >= elementLeft && position.x <= elementRight &&
-            position.y >= elementTop && position.y <= elementBottom
-}
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun StepDetails(
