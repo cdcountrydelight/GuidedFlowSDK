@@ -18,11 +18,9 @@ internal object HttpClientManager {
     @Volatile
     private var apiService: UIElementsApiService? = null
 
-
     private var authToken: String? = null
 
     private var isProdEnvironment: Boolean = false
-
 
     fun initializeDetails(authToken: String, isProdEnvironment: Boolean) {
         this.authToken = authToken
@@ -40,7 +38,7 @@ internal object HttpClientManager {
     private fun createRetrofit(context: Context): Retrofit {
         return retrofit ?: synchronized(this) {
             retrofit ?: Retrofit.Builder()
-                .baseUrl("https://qa-stock.countrydelight.in/api/cd_training/")
+                .baseUrl(if (isProdEnvironment) "https://stock.countrydelight.in/api/cd_training/" else "https://qa-stock.countrydelight.in/api/cd_training/")
                 .client(createOkHttpClient(context))
                 .addConverterFactory(
                     GsonConverterFactory.create(
