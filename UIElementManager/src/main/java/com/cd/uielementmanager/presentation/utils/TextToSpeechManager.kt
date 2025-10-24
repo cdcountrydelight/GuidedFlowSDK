@@ -5,7 +5,7 @@ import android.speech.tts.TextToSpeech
 import android.util.Log
 import java.util.Locale
 
-class TextToSpeechManager(context: Context) {
+internal class TextToSpeechManager(context: Context) {
     private var textToSpeech: TextToSpeech? = null
     private var isInitialized = false
 

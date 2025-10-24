@@ -139,7 +139,7 @@ class UIElementViewModel() : ViewModel() {
     /**
      * Extract and send UI data to server using clean architecture
      */
-    fun sendUIElements(context: Context, rootView: View, packageName: String) {
+    fun sendUIElements(context: Context, imageBitmap: Bitmap, packageName: String) {
         val currentScreen = currentScreen
         if (_sendUiElementsStateFlow.value is DataUiResponseStatus.Loading || currentScreen == null) {
             return
@@ -165,7 +165,7 @@ class UIElementViewModel() : ViewModel() {
                                 AppErrorCodes.UNKNOWN_ERROR
                             )
                         } else {
-                            val screenshotFile = captureScreenshot(rootView, context)
+                            val screenshotFile = createFileFromBitmap(imageBitmap, context)
                             val screenshotPart = MultipartBody.Part.createFormData(
                                 "screenshot",
                                 screenshotFile.name,
@@ -220,21 +220,6 @@ class UIElementViewModel() : ViewModel() {
         )
         return screenInfoJson.toRequestBody("text/plain".toMediaType())
     }
-
-    private suspend fun captureScreenshot(view: View, context: Context): File =
-        withContext(Dispatchers.Main) {
-            val bitmap = createBitmap(view.width, view.height)
-            val canvas = Canvas(bitmap)
-            view.draw(canvas)
-            withContext(Dispatchers.IO) {
-                val timestamp = System.currentTimeMillis()
-                val file = File(context.cacheDir, "screenshot_$timestamp.png")
-                FileOutputStream(file).use { out ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                }
-                file
-            }
-        }
 
     /**
      * Clear tracked elements for a specific screen or the current screen
@@ -292,5 +277,14 @@ class UIElementViewModel() : ViewModel() {
     override fun onCleared() {
         HttpClientManager.clearInstance()
         super.onCleared()
+    }
+
+    private fun createFileFromBitmap(bitmap: Bitmap, context: Context): File {
+        val timestamp = System.currentTimeMillis()
+        val file = File(context.cacheDir, "screenshot_$timestamp.png")
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
+        return file
     }
 }

@@ -1,13 +1,14 @@
 package com.cd.uielementmanager.presentation.overlay
 
-import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.view.Gravity
 import android.view.View
 import android.view.WindowManager
 import com.cd.uielementmanager.domain.contents.UIElementContent
+import com.cd.uielementmanager.presentation.ScreenshotHelper
 import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.showToast
@@ -32,8 +33,8 @@ internal class TrackingOverlayManager(
     private var isOverlayShown = false
     private lateinit var packageName: String
     private var capturedElements: Map<String, UIElementContent> = emptyMap()
-
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var screenShotHelper: ScreenshotHelper? = null
 
     /**
      * Show the tracking overlay
@@ -107,6 +108,15 @@ internal class TrackingOverlayManager(
         this.packageName = packageName
     }
 
+    fun setMediaProjectionData(resultCode: Int, resultData: Intent) {
+        screenShotHelper = ScreenshotHelper(context, resultCode, resultData)
+        screenShotHelper?.initMediaProjection()
+    }
+
+    fun releaseMediaProjection() {
+        screenShotHelper?.releaseVirtualDisplay()
+    }
+
 
     /**
      * Hide the tracking overlay
@@ -174,56 +184,6 @@ internal class TrackingOverlayManager(
     }
 
     /**
-     * Try to find the root view from the window manager
-     */
-    @SuppressLint("PrivateApi")
-    private fun getRootView(): View? {
-        return try {
-            // Method 1: Try to get root views from WindowManager via reflection
-            val windowManagerGlobal = Class.forName("android.view.WindowManagerGlobal")
-                .getMethod("getInstance")
-                .invoke(null)
-            val getViewRootNames = windowManagerGlobal.javaClass
-                .getDeclaredMethod("getViewRootNames")
-            val getRootView = windowManagerGlobal.javaClass
-                .getDeclaredMethod("getRootView", String::class.java)
-            val viewRootNames = getViewRootNames.invoke(windowManagerGlobal) as Array<*>
-            for (name in viewRootNames) {
-                val rootView = getRootView.invoke(windowManagerGlobal, name) as? View
-                if (rootView != null && rootView != overlayView && isMainActivityView(rootView)) {
-                    return rootView
-                }
-            }
-            for (name in viewRootNames) {
-                val rootView = getRootView.invoke(windowManagerGlobal, name) as? View
-                if (rootView != null && rootView != overlayView) {
-                    return rootView
-                }
-            }
-            null
-        } catch (e: Exception) {
-            context.showToast("Unable to find root view ${e.localizedMessage}")
-            null
-        }
-    }
-
-    /**
-     * Check if this view likely belongs to the main activity
-     */
-    private fun isMainActivityView(view: View): Boolean {
-        return try {
-            val context = view.context
-            val className = context.javaClass.simpleName
-            // Look for activity-like contexts
-            className.contains("Activity") ||
-                    className.contains("MainActivity") ||
-                    view.width > 500 && view.height > 500 // Large views are likely main content
-        } catch (_: Exception) {
-            false
-        }
-    }
-
-    /**
      * Temporarily hide overlay during screenshot capture to prevent it from appearing in the image
      */
     fun temporarilyHideOverlay(callback: suspend () -> Unit) {
@@ -283,11 +243,12 @@ internal class TrackingOverlayManager(
      */
     private fun captureRootViewAndSendToServer() {
         temporarilyHideOverlay {
-            val view = getRootView()
-            if (view != null) {
-                uiElementViewModel.sendUIElements(context, view, packageName)
+            if (screenShotHelper == null) {
+                context.showToast("Permission Denied , Please Grant Permission Again")
             } else {
-                context.showToast("No view available for screenshot. Please ensure app is in foreground.")
+                screenShotHelper?.captureScreenshot {
+                    uiElementViewModel.sendUIElements(context, it, packageName)
+                }
             }
         }
     }

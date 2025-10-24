@@ -27,11 +27,9 @@ val LocalUIElementViewModel = compositionLocalOf<UIElementViewModel?> { null }
 @Composable
 fun Modifier.trackElement(screenName: String, tag: String): Modifier {
     val elementTracker = LocalUIElementViewModel.current
-
     if (elementTracker == null) {
         return this
     }
-
     return this
         .semantics {
             testTag = "ui_element_${screenName}_$tag"

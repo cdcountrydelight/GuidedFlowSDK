@@ -1,7 +1,11 @@
 package com.cd.extracttagapp.screens
 
 import android.app.Activity
+import android.content.Context
+import android.media.projection.MediaProjectionManager
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,34 +20,65 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.cd.uielementmanager.UIElementTrackingSDK
-import com.cd.uielementmanager.presentation.StartMode
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cd.uielementmanager.presentation.UIElementTrackingSDK
 import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     elementTracker: UIElementViewModel,
+    homeScreenViewModel: HomeScreenViewModel = viewModel(),
     onNavigateToTestScreen: () -> Unit,
     onNavigateToTestOverlay: () -> Unit = {}
 ) {
-    val context = LocalContext.current
-    var isServiceRunning by remember { mutableStateOf(UIElementTrackingSDK.isSDKRunning()) }
 
-    // Clear any previous tracking data when entering home screen
+    val context = LocalContext.current
+    val activity = context as? Activity ?: return
+
+    val authToken = remember {
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMzY1OTgxLCJpYXQiOjE3NjEyNzk1ODF9.2jurE3TB9sPGJ8-n4IxWRBDNiJr3VXkQg9Uz6-Y01es"
+    }
+
+    val isProdEnv = remember {
+        false
+    }
+
+    val packageName = remember {
+        "deliveryapp.countrydelight.in.deliveryapp"
+    }
+
+    val projectionManager = remember {
+        context.getSystemService(Context.MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
+    }
+
+    val mediaProjectionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+            UIElementTrackingSDK.startSenderSDK(
+                activity,
+                elementTracker,
+                authToken,
+                isProdEnv,
+                result.resultCode,
+                result.data,
+                packageName,
+            )
+            homeScreenViewModel.isSenderSDKStarted = true
+        } else {
+            Toast.makeText(context, "Screen capture permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     LaunchedEffect(Unit) {
         elementTracker.clearTrackedElements()
-        // Check service status on screen load
-        isServiceRunning = UIElementTrackingSDK.isSDKRunning()
     }
 
     Scaffold(
@@ -71,44 +106,33 @@ fun HomeScreen(
             ) {
                 Button(
                     onClick = {
-                        if (isServiceRunning) {
-                            // Stop the service
+                        if (homeScreenViewModel.isSenderSDKStarted) {
                             UIElementTrackingSDK.stopService(context)
-                            Toast.makeText(context, "UI tracking stopped", Toast.LENGTH_SHORT)
-                                .show()
-                            isServiceRunning = false
+                            homeScreenViewModel.isSenderSDKStarted = false
                         } else {
-                            val activity = context as? Activity
-                            if (activity != null) {
-                                // Start service (will automatically check and request overlay permission if needed)
-                                UIElementTrackingSDK.startService(
-                                    activity,
-                                    elementTracker,
-                                    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMzY1OTgxLCJpYXQiOjE3NjEyNzk1ODF9.2jurE3TB9sPGJ8-n4IxWRBDNiJr3VXkQg9Uz6-Y01es",
-                                    StartMode.Both,
-                                    false,
-                                    "deliveryapp.countrydelight.in.deliveryapp",
-                                )
-                                // Update the state after a short delay to check if service started
-                                isServiceRunning = UIElementTrackingSDK.isSDKRunning()
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "Unable to start service",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                            val captureIntent = projectionManager.createScreenCaptureIntent()
+                            mediaProjectionLauncher.launch(captureIntent)
                         }
-                    },
-                    modifier = Modifier
+                    }, modifier = Modifier
                         .fillMaxWidth()
                 ) {
-                    Text(
-                        text = if (isServiceRunning) "Stop UI Element Extraction" else "Start UI Element Extraction",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    Text("${if (homeScreenViewModel.isSenderSDKStarted) "Stop" else "Start"} Sender SDK")
                 }
 
+                Button(
+                    onClick = {
+                        UIElementTrackingSDK.startTrainingSDK(
+                            activity,
+                            elementTracker,
+                            authToken,
+                            isProdEnv,
+                            packageName
+                        )
+                    }, modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text("Start Training SDK")
+                }
 
                 Button(
                     onClick = onNavigateToTestScreen,
