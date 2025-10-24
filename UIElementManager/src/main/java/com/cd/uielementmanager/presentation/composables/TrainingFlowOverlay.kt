@@ -36,7 +36,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -54,7 +53,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -62,13 +60,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.cd.uielementmanager.R
 import com.cd.uielementmanager.domain.contents.HighlightedElementContent
 import com.cd.uielementmanager.domain.contents.TrainingStepContent
 import com.cd.uielementmanager.domain.contents.UIElementContent
-import com.cd.uielementmanager.presentation.beans.ButtonHandlerBean
-import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
-import com.cd.uielementmanager.presentation.utils.FunctionHelper.getErrorMessage
 import com.cd.uielementmanager.presentation.utils.TextToSpeechManager
 import kotlinx.coroutines.delay
 import kotlin.math.abs
@@ -79,7 +73,7 @@ fun TrainingFlowOverlay(viewModel: UIElementViewModel, modifier: Modifier = Modi
     val context = LocalContext.current
     val ttsManager = remember { TextToSpeechManager(context) }
     Box(modifier = modifier) {
-        StepDetails(viewModel,viewModel.currentScreenStepsList,ttsManager)
+        StepDetails(viewModel, viewModel.currentScreenStepsList, ttsManager)
     }
 
     DisposableEffect(ttsManager) {
@@ -88,42 +82,6 @@ fun TrainingFlowOverlay(viewModel: UIElementViewModel, modifier: Modifier = Modi
         }
     }
 }
-
-//@Composable
-//private fun HandleTrainingFlowStateFlow(
-//    viewModel: UIElementViewModel,
-//    ttsManager: TextToSpeechManager
-//) {
-//    val context = LocalContext.current
-//    var isErrorResponseHandled by remember {
-//        mutableStateOf(false)
-//    }
-//    when (val response = viewModel.trainingFlowState.collectAsStateWithLifecycle().value) {
-//        is DataUiResponseStatus.Loading -> {
-//            LoadingSection()
-//            isErrorResponseHandled = false
-//        }
-//
-//        is DataUiResponseStatus.Failure -> {
-//            if (!isErrorResponseHandled) {
-//                ErrorAlertDialog(
-//                    context.getErrorMessage(response.errorMessage, response.errorCode),
-//                    positiveButton = ButtonHandlerBean(stringResource(R.string.dismiss), {
-//                        isErrorResponseHandled = true
-//                    })
-//                )
-//            }
-//        }
-//
-//        is DataUiResponseStatus.Success -> {
-//            StepDetails(viewModel, response.data.steps, ttsManager)
-//        }
-//
-//        is DataUiResponseStatus.None -> {
-//            // no need to handle it
-//        }
-//    }
-//}
 
 @Composable
 private fun StepDetails(
@@ -139,7 +97,7 @@ private fun StepDetails(
     if (currentStep != null) {
         val currentScreenElements = trackedElements[currentStep.screenName]
         val elementToHighlight =
-            currentScreenElements?.get("back_button")
+            currentScreenElements?.get(currentStep.highlightedElementContent.elementId)
         if (elementToHighlight != null) {
             val xDp = with(density) { elementToHighlight.bounds.position.x.toDp() }
             val yDp = with(density) { elementToHighlight.bounds.position.y.toDp() }
@@ -153,7 +111,8 @@ private fun StepDetails(
                 parseHexColor(currentStep.highlightedElementContent.borderColor) ?: Color.Red
             Box(
                 modifier = Modifier
-                    .fillMaxSize()) {
+                    .fillMaxSize()
+            ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val fullScreenPath = Path().apply {
                         addRect(Rect(0f, 0f, size.width, size.height))

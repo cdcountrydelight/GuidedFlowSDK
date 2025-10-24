@@ -6,9 +6,9 @@ import com.google.gson.annotations.SerializedName
  * Data layer entity for highlighted element - represents API response structure
  */
 internal data class HighlightedElementEntity(
-    @SerializedName("element_id")
+    @SerializedName("tag")
     val elementId: String,
-    @SerializedName("border_shape")
+    @SerializedName("shape")
     val borderShape: String, // "circle", "rounded", "rectangle"
     @SerializedName("border_stroke_width")
     val borderStrokeWidth: Float, // in pixels
