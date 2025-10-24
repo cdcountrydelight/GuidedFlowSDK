@@ -43,10 +43,7 @@ object UIElementTrackingSDK {
             HttpClientManager.authToken = authToken
             val intent = Intent(activity, UIElementTrackingService::class.java)
             intent.putExtra("packageName", packageName ?: activity.packageName)
-            intent.putExtra(
-                "showOverLay",
-                startMode == StartMode.Sender || startMode == StartMode.Both
-            )
+            intent.putExtra("startMode", startMode)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 activity.startForegroundService(intent)
             } else {
