@@ -62,6 +62,7 @@ class UIElementTrackingService : Service() {
                 val data = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra("data", Intent::class.java)
                 } else {
+                    @Suppress("DEPRECATION")
                     intent.getParcelableExtra("data")
                 } ?: return START_NOT_STICKY
                 overlayManager.setMediaProjectionData(resultCode, data)

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
@@ -124,7 +124,7 @@ private fun StepDetails(
     val trackedElements by viewModel.trackedElements.collectAsStateWithLifecycle()
     val density = LocalDensity.current
     val currentStep = steps.getOrNull(currentStepIndex)
-    if (currentStep != null && currentStep.highlightedElementContent!=null) {
+    if (currentStep != null) {
         val currentScreenElements = trackedElements[currentStep.screenName]
         val elementToHighlight =
             currentScreenElements?.get("back_button")
@@ -207,18 +207,11 @@ private fun StepDetails(
 //                                    }
 //                                }
 //                            }
-
-//                            .pointerInput(Unit) {
-//                                detectTapGestures { offset ->
-//                                    sendTouchToUnderlyingView(
-//                                        context = context,
-//                                        offset = offset,
-//                                        highlightX = xDp,
-//                                        highlightY = yDp
-//                                    )
-//                                    viewModel.nextTrainingStep()
-//                                }
-//                            }
+                            .pointerInput(Unit) {
+                                detectTapGestures { offset ->
+                                    viewModel.nextTrainingStep()
+                                }
+                            }
                     )
                     if (!currentStep.instructions.isNullOrEmpty()) {
                         InstructionsSection(currentStep.instructions, ttsManager)
@@ -332,7 +325,10 @@ private fun InstructionsSection(instructions: List<String>, ttsManager: TextToSp
     }
 }
 
-private fun getBorderShape(density: Density, highlightedElement: HighlightedElementContent?): Shape {
+private fun getBorderShape(
+    density: Density,
+    highlightedElement: HighlightedElementContent?
+): Shape {
     val borderRadiusDp = highlightedElement?.borderRadius?.let {
         with(density) { it.toDp() }
     } ?: 8.dp
