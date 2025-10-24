@@ -13,20 +13,10 @@ import com.cd.uielementmanager.presentation.utils.FunctionHelper.showToast
 import com.cd.uielementmanager.presentation.utils.ViewModelHelper
 import com.cd.uielementmanager.service.UIElementTrackingService
 
-/**
- * Main entry point for the UI Element Tracking SDK
- * Provides simple API to start/stop tracking UI elements across the app
- */
 object UIElementTrackingSDK {
 
     private const val OVERLAY_PERMISSION_REQUEST_CODE = 1234
 
-    /**
-     * Start tracking UI elements
-     * Automatically checks for overlay permission and requests it if needed
-     *
-     * @param activity The activity to use for permission request
-     */
     fun startService(
         activity: Activity,
         viewModel: UIElementViewModel,
@@ -59,24 +49,14 @@ object UIElementTrackingSDK {
         }
     }
 
-    /**
-     * Stop tracking UI elements
-     */
     fun stopService(context: Context) {
         context.stopService(Intent(context, UIElementTrackingService::class.java))
     }
 
-    /**
-     * Check if tracking service is currently running
-     */
     fun isSDKRunning(): Boolean {
         return UIElementTrackingService.isRunning()
     }
 
-    /**
-     * Request overlay permission
-     * Opens system settings for the user to grant permission
-     */
     private fun requestOverlayPermission(activity: Activity) {
         val intent = Intent(
             Settings.ACTION_MANAGE_OVERLAY_PERMISSION,

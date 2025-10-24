@@ -7,13 +7,13 @@ import com.google.gson.annotations.SerializedName
  */
 internal data class TrainingStepEntity(
     @SerializedName("id")
-    val id: Int,
+    val id: Int?,
     @SerializedName("step_number")
-    val stepNumber: Int,
+    val stepNumber: Int?,
     @SerializedName("screen_name")
-    val screenName: String,
+    val screenName: String?,
     @SerializedName("highlighted_element")
-    val highlightedElement: HighlightedElementEntity,
+    val highlightedElement: HighlightedElementEntity?,
     @SerializedName("instructions")
-    val instructions: List<String>
+    val instructions: List<String>?
 )

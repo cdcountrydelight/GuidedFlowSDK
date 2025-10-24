@@ -7,11 +7,11 @@ import com.google.gson.annotations.SerializedName
  */
 internal data class HighlightedElementEntity(
     @SerializedName("tag")
-    val elementId: String,
+    val elementId: String?,
     @SerializedName("shape")
-    val borderShape: String, // "circle", "rounded", "rectangle"
+    val borderShape: String?, // "circle", "rounded", "rectangle"
     @SerializedName("border_stroke_width")
-    val borderStrokeWidth: Float, // in pixels
+    val borderStrokeWidth: Float?, // in pixels
     @SerializedName("border_radius")
     val borderRadius: Float? = null, // in pixels, only used for "rounded" shape
     @SerializedName("border_color")

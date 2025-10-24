@@ -20,9 +20,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 
-/**
- * Foreground service that manages UI element tracking overlay
- */
 class UIElementTrackingService : Service() {
 
     companion object {
@@ -30,9 +27,6 @@ class UIElementTrackingService : Service() {
         private const val CHANNEL_ID = "ui_element_tracking_channel"
         private const val ACTION_STOP_SERVICE = "com.cd.uielementmanager.STOP_TRACKING"
 
-        /**
-         * Check if the service is currently running
-         */
         internal fun isRunning(): Boolean {
             return instance != null
         }

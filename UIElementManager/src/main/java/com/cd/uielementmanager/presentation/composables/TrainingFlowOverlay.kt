@@ -141,7 +141,7 @@ private fun StepDetails(
     val trackedElements by viewModel.trackedElements.collectAsStateWithLifecycle()
     val density = LocalDensity.current
     val currentStep = steps.getOrNull(currentStepIndex)
-    if (currentStep != null) {
+    if (currentStep != null && currentStep.highlightedElementContent!=null) {
         val currentScreenElements = trackedElements[currentStep.screenName]
         val elementToHighlight =
             currentScreenElements?.get("back_button")
@@ -237,7 +237,7 @@ private fun StepDetails(
 //                                }
 //                            }
                     )
-                    if (currentStep.instructions.isNotEmpty()) {
+                    if (!currentStep.instructions.isNullOrEmpty()) {
                         InstructionsSection(currentStep.instructions, ttsManager)
                     }
                 }
@@ -349,11 +349,11 @@ private fun InstructionsSection(instructions: List<String>, ttsManager: TextToSp
     }
 }
 
-private fun getBorderShape(density: Density, highlightedElement: HighlightedElementContent): Shape {
-    val borderRadiusDp = highlightedElement.borderRadius?.let {
+private fun getBorderShape(density: Density, highlightedElement: HighlightedElementContent?): Shape {
+    val borderRadiusDp = highlightedElement?.borderRadius?.let {
         with(density) { it.toDp() }
     } ?: 8.dp
-    return when (highlightedElement.borderShape?.trim()) {
+    return when (highlightedElement?.borderShape?.trim()) {
         "circle" -> CircleShape
         "rounded" -> RoundedCornerShape(borderRadiusDp)
         else -> RectangleShape

@@ -5,8 +5,8 @@ package com.cd.uielementmanager.domain.contents
  * Clean domain model without framework dependencies
  */
 data class TrainingFlowContent(
-    val id: Int,
-    val name: String,
-    val stepCount: Int,
+    val id: Int?,
+    val name: String?,
+    val stepCount: Int?,
     val steps: List<TrainingStepContent>
 )

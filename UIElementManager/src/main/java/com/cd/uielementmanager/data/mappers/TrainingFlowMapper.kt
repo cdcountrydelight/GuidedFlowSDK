@@ -16,7 +16,8 @@ internal class TrainingFlowMapper : IBaseMapper<TrainingFlowEntity, TrainingFlow
             id = data.id,
             name = data.name,
             stepCount = data.stepCount,
-            steps = data.steps.map { trainingStepMapper.mapData(it) }.sortedBy { it.stepNumber }
+            steps = data.steps?.mapNotNull { trainingStepMapper.mapData(it) }
+                ?.sortedBy { it.stepNumber } ?: arrayListOf()
         )
     }
 }
