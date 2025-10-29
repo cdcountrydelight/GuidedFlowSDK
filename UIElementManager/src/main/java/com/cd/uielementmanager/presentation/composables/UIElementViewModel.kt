@@ -2,11 +2,8 @@ package com.cd.uielementmanager.presentation.composables
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.view.View
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Rect
-import androidx.core.graphics.createBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cd.uielementmanager.data.network.HttpClientManager
@@ -23,14 +20,12 @@ import com.cd.uielementmanager.domain.use_cases.SendUIElementsUseCase
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.mapToDataUiResponseStatus
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
