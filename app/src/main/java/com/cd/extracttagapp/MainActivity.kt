@@ -61,7 +61,6 @@ fun AppNavigation(viewModel: UIElementViewModel) {
                 enableTrainingFlow = enableOverlay
             ) {
                 UIElementsScreen(
-                    elementTracker = viewModel,
                     onBack = {
                         navController.popBackStack()
                     },

@@ -126,7 +126,7 @@ private fun StepDetails(
     if (currentStep != null) {
         val currentScreenElements = trackedElements[currentStep.screenName]
         val elementToHighlight =
-            currentScreenElements?.get("back_button")
+            currentScreenElements?.get(currentStep.highlightedElementContent.elementId)
         if (elementToHighlight != null) {
             val xDp = with(density) { elementToHighlight.bounds.position.x.toDp() }
             val yDp = with(density) { elementToHighlight.bounds.position.y.toDp() }
