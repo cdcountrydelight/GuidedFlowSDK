@@ -65,19 +65,21 @@ fun AppNavigation(viewModel: UIElementViewModel) {
                         navController.popBackStack()
                     },
                     onNavigateToSimpleElements = {
-                        navController.navigate("simple_elements")
+                        navController.navigate("simple_elements/$enableOverlay")
                     }
                 )
             }
         }
 
-        composable("simple_elements") {
+        composable("simple_elements/{enableOverlay}") { backStackEntry ->
+            val enableOverlay =
+                backStackEntry.arguments?.getString("enableOverlay")?.toBoolean() ?: false
             UIElementProvider(
                 screenName = "simple_elements_screen",
-                uIElementViewModel = viewModel
+                uIElementViewModel = viewModel,
+                enableTrainingFlow = enableOverlay
             ) {
                 SimpleElementsScreen(
-                    elementTracker = viewModel,
                     onBack = {
                         navController.popBackStack()
                     }
