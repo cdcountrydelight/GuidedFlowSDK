@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 
 
 /**
@@ -27,7 +28,8 @@ fun UIElementProvider(
     enableTrainingFlow: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    uIElementViewModel.setCurrentScreen(screenName)
+    val context= LocalContext.current
+    uIElementViewModel.setCurrentScreen(screenName,context)
     CompositionLocalProvider(LocalUIElementViewModel provides uIElementViewModel) {
         Box(modifier = modifier) {
             content()

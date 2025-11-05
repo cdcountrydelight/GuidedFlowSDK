@@ -17,9 +17,11 @@ import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
 import com.cd.uielementmanager.domain.use_cases.GetTrainingFlowUseCase
 import com.cd.uielementmanager.domain.use_cases.SendPackageNameUseCase
 import com.cd.uielementmanager.domain.use_cases.SendUIElementsUseCase
+import com.cd.uielementmanager.domain.use_cases.StartFlowUseCase
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.mapToDataUiResponseStatus
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -70,13 +72,19 @@ class UIElementViewModel() : ViewModel() {
 
     internal var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
 
-    internal fun setCurrentScreen(screen: String) {
+    internal var alreadyStartedFlows = mutableSetOf<String>()
+
+    internal fun setCurrentScreen(screen: String, context: Context) {
         val previousScreen = currentScreen
         currentScreen = screen
         viewModelScope.launch {
-            delay(200)
+            delay(300)
             currentScreenStepsList.clear()
-            currentScreenStepsList.addAll(trainingFlowResponseMap[screen] ?: arrayListOf())
+            val currentSteps = trainingFlowResponseMap[screen] ?: arrayListOf()
+            currentScreenStepsList.addAll(currentSteps)
+            if (currentSteps.isNotEmpty()) {
+                startFlow(currentSteps.getOrNull(0)?.flowId, context)
+            }
         }
         if (previousScreen != null && previousScreen != screen) {
             clearElementsForScreen(previousScreen)
@@ -129,6 +137,19 @@ class UIElementViewModel() : ViewModel() {
         val screenName = currentScreen ?: return emptyMap()
         return _trackedElements.value[screenName] ?: emptyMap()
     }
+
+
+    internal fun startFlow(flowId: String?, context: Context) {
+        if (flowId == null) return
+        viewModelScope.launch(Dispatchers.IO) {
+            if (alreadyStartedFlows.contains(flowId)) return@launch
+            val response = StartFlowUseCase().invoke(flowId, context)
+            if (response is DataResponseStatus.Success) {
+                alreadyStartedFlows.add(flowId)
+            }
+        }
+    }
+
 
 
     /**

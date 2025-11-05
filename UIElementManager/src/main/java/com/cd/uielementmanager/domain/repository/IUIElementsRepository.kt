@@ -30,15 +30,18 @@ internal interface IUIElementsRepository {
         screenInfoPart: RequestBody,
         elementsPart: RequestBody
     ): DataResponseStatus<Unit>
-    
+
     /**
      * Get training flow data by ID
      *
      * @return DataResponseStatus with TrainingFlow data
      */
-    suspend fun getTrainingFlow(packageName: String):DataResponseStatus<List<TrainingFlowContent>>
+    suspend fun getTrainingFlow(packageName: String): DataResponseStatus<List<TrainingFlowContent>>
 
     suspend fun sendPackageName(packageName: String): DataResponseStatus<PackageNameResponse>
+
+
+    suspend fun startFlow(flowId: String): DataResponseStatus<Unit>
 
 
 }

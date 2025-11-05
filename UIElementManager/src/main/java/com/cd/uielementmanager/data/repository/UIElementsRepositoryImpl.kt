@@ -45,6 +45,12 @@ internal class UIElementsRepositoryImpl(private val apiService: UIElementsApiSer
         }
     }
 
+    override suspend fun startFlow(flowId: String): DataResponseStatus<Unit> {
+        return networkCall {
+            apiService.startFlow(flowId)
+        }
+    }
+
     override suspend fun getTrainingFlow(packageName: String): DataResponseStatus<List<TrainingFlowContent>> {
         return networkCallForList(TrainingFlowMapper()) {
             apiService.getTrainingFlow(packageName)

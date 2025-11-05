@@ -43,7 +43,7 @@ fun HomeScreen(
     val activity = context as? Activity ?: return
 
     val authToken = remember {
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYyMzIyNDg5LCJpYXQiOjE3NjIyMzYwODl9.eR2jQs7qQy5bPsX0EA8Tag-mx6SwpIWA8BTOxYZq_TI"
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYyNDEwMTg4LCJpYXQiOjE3NjIzMjM3ODh9.TD4yxM48ZNhpQBT9RgpxS6P5uONEvOCV09bDCXtNGug"
     }
 
     val isProdEnv = remember {

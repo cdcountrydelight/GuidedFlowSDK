@@ -22,7 +22,8 @@ internal class TrainingStepMapper : IBaseMapper<TrainingStepEntity, TrainingStep
                 stepNumber = data.stepNumber,
                 screenName = data.screenName,
                 highlightedElementContent = highlightedElementsMappedData,
-                instructions = data.instructions
+                instructions = data.instructions,
+                flowId = data.flowId ?: "21"
             )
         }
     }

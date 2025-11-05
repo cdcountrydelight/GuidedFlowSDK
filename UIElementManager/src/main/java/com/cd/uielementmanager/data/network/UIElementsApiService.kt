@@ -36,4 +36,7 @@ internal interface UIElementsApiService {
     suspend fun uploadPackageName(
         @Path("packageName") packageName: String
     ): Response<PackageNameResponse>
+
+    @GET("guided-flows/{flowId}/")
+    suspend fun startFlow(@Path("flowId") flowId: String): Response<Unit>
 }
