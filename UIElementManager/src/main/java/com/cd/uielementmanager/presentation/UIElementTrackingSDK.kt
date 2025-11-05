@@ -62,9 +62,11 @@ object UIElementTrackingSDK {
         viewModel: UIElementViewModel,
         authToken: String,
         isProdEnvironment: Boolean,
-        packageName: String? = null
+        packageName: String? = null,
+        removeStatusBarHeight: Boolean = false
     ) {
         initializeSDK(activity, viewModel, authToken, isProdEnvironment) {
+            viewModel.removeStatusBarHeight = removeStatusBarHeight
             viewModel.fetchTrainingFlow(activity, packageName ?: activity.packageName)
             if (!isProdEnvironment) {
                 activity.showToast("Training SDK Started")

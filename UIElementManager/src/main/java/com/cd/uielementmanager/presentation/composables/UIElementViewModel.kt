@@ -74,6 +74,9 @@ class UIElementViewModel() : ViewModel() {
 
     internal var alreadyStartedFlows = mutableSetOf<String>()
 
+
+    internal var removeStatusBarHeight = false
+
     internal fun setCurrentScreen(screen: String, context: Context) {
         val previousScreen = currentScreen
         currentScreen = screen
@@ -149,7 +152,6 @@ class UIElementViewModel() : ViewModel() {
             }
         }
     }
-
 
 
     /**
