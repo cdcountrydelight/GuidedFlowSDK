@@ -36,14 +36,15 @@ fun HomeScreen(
     elementTracker: UIElementViewModel,
     homeScreenViewModel: HomeScreenViewModel = viewModel(),
     onNavigateToTestScreen: () -> Unit,
-    onNavigateToTestOverlay: () -> Unit = {}
+    onNavigateToTestOverlay: () -> Unit = {},
+    onNavigateToQuizScreen: () -> Unit
 ) {
 
     val context = LocalContext.current
     val activity = context as? Activity ?: return
 
     val authToken = remember {
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzYxMzY1OTgxLCJpYXQiOjE3NjEyNzk1ODF9.2jurE3TB9sPGJ8-n4IxWRBDNiJr3VXkQg9Uz6-Y01es"
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzY0Njc2Mjc1LCJpYXQiOjE3NjQ1ODk4NzV9.uhFhGc4P_Up_SX-DAyipBfRu1MJZW9L3C8vtfwLBsHw"
     }
 
     val isProdEnv = remember {
@@ -149,6 +150,16 @@ fun HomeScreen(
                     Text(
                         text = "Test Overlay Functionality",
                         style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+
+                Button(
+                    onClick = onNavigateToQuizScreen,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Quiz Section",
+                        style =MaterialTheme.typography.bodyLarge
                     )
                 }
             }

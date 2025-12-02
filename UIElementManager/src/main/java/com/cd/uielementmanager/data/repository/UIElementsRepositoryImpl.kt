@@ -1,15 +1,27 @@
 package com.cd.uielementmanager.data.repository
 
+import com.cd.uielementmanager.data.entities.CompleteQnARequestEntity
+import com.cd.uielementmanager.data.entities.CompleteQuestionsRequestEntity
 import com.cd.uielementmanager.data.entities.HighlightedElementEntity
 import com.cd.uielementmanager.data.entities.PackageNameResponse
 import com.cd.uielementmanager.data.entities.TrainingFlowEntity
 import com.cd.uielementmanager.data.entities.TrainingStepEntity
+import com.cd.uielementmanager.data.mappers.CompleteFlowResponseMapper
+import com.cd.uielementmanager.data.mappers.CompleteQnAResponseEntityToContentMapper
+import com.cd.uielementmanager.data.mappers.FlowListMapper
+import com.cd.uielementmanager.data.mappers.QnAResponseEntityToContentMapper
 import com.cd.uielementmanager.data.mappers.TrainingFlowMapper
 import com.cd.uielementmanager.data.network.NetworkCallHelper.networkCall
 import com.cd.uielementmanager.data.network.NetworkCallHelper.networkCallForList
 import com.cd.uielementmanager.data.network.NetworkCallHelper.networkCallForUpload
 import com.cd.uielementmanager.data.network.UIElementsApiService
+import com.cd.uielementmanager.domain.contents.CompleteFlowResponseContent
+import com.cd.uielementmanager.domain.contents.CompleteQnAContent
+import com.cd.uielementmanager.domain.contents.CompleteQnaResponseContent
+import com.cd.uielementmanager.domain.contents.FlowListResponseContent
+import com.cd.uielementmanager.domain.contents.QnaResponseContent
 import com.cd.uielementmanager.domain.contents.TrainingFlowContent
+import com.cd.uielementmanager.domain.domain_utils.AppErrorCodes
 import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
 import com.cd.uielementmanager.domain.repository.IUIElementsRepository
 import okhttp3.MultipartBody
@@ -42,13 +54,113 @@ internal class UIElementsRepositoryImpl(private val apiService: UIElementsApiSer
         }
     }
 
+    override suspend fun getFlowsList(
+        packageName: String,
+        authToken: String
+    ): DataResponseStatus<List<FlowListResponseContent>> {
+
+        val mapper = FlowListMapper()
+
+        val response = networkCall(mapper) {
+            apiService.getFlowList(
+                packageName = packageName,
+                token = "Bearer $authToken"
+            )
+        }
+
+        return when (response) {
+            is DataResponseStatus.Success -> {
+                val data = response.data
+                if (data.isEmpty()) {
+                    DataResponseStatus.failure(
+                        "No active flows found",
+                        AppErrorCodes.UNKNOWN_ERROR
+                    )
+                } else {
+                    DataResponseStatus.success(data)
+                }
+            }
+
+            is DataResponseStatus.Failure -> response
+        }
+    }
+
+
+
+
     override suspend fun sendPackageName(packageName: String): DataResponseStatus<PackageNameResponse> {
         return networkCall {
             apiService.uploadPackageName(packageName)
         }
     }
 
-    override suspend fun getTrainingFlow(packageName: String): DataResponseStatus<List<TrainingFlowContent>> {
+
+
+    //private val authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzY0Njc2Mjc1LCJpYXQiOjE3NjQ1ODk4NzV9.uhFhGc4P_Up_SX-DAyipBfRu1MJZW9L3C8vtfwLBsHw"
+
+    override suspend fun getQnADetails(
+        flowId: Int,
+        authToken: String
+    ): DataResponseStatus<QnaResponseContent> {
+
+        val mapper = QnAResponseEntityToContentMapper()
+        val response = networkCall(mapper) {
+            apiService.getQuizFlow(flowId,"Bearer $authToken")
+        }
+
+        return when (response) {
+            is DataResponseStatus.Success -> {
+                val data = response.data
+
+                if (data == null) {
+                    DataResponseStatus.failure(
+                        errorMessage = "No QnA data found",
+                        errorCode = AppErrorCodes.UNKNOWN_ERROR
+                    )
+                } else {
+                    DataResponseStatus.success(data)
+                }
+            }
+
+            is DataResponseStatus.Failure -> {
+                response
+            }
+        }
+    }
+
+
+    override suspend fun completeQnA(
+        flowId: Int,
+        completeQnAList: List<CompleteQnAContent>,
+        authToken: String
+    ): DataResponseStatus<CompleteQnaResponseContent> {
+
+        val requestBody = CompleteQnARequestEntity(
+            completeQnAList.map {
+                CompleteQuestionsRequestEntity(
+                    it.question,
+                    it.options
+                )
+            }
+        )
+
+        return networkCall(CompleteQnAResponseEntityToContentMapper()) {
+//            apiService.completeQnA(flowId, requestBody)
+            apiService.completeQnA(flowId,"Bearer $authToken", requestBody)
+        }
+    }
+
+    override suspend fun completeTraining(
+        flowId: Int,
+        authToken: String
+    ): DataResponseStatus<CompleteFlowResponseContent> {
+
+        return networkCall(CompleteFlowResponseMapper()) {
+            apiService.completeTraining(flowId,"Bearer $authToken")
+        }
+    }
+
+    override suspend fun getTrainingFlow(packageName: String,authToken: String): DataResponseStatus<List<TrainingFlowContent>> {
         return networkCallForList(TrainingFlowMapper()) {
             apiService.getTrainingFlow(packageName)
         }

@@ -65,7 +65,7 @@ object UIElementTrackingSDK {
         packageName: String? = null
     ) {
         initializeSDK(activity, viewModel, authToken, isProdEnvironment) {
-            viewModel.fetchTrainingFlow(activity, packageName ?: activity.packageName)
+            viewModel.fetchTrainingFlow(activity, packageName ?: activity.packageName, authToken)
             if (!isProdEnvironment) {
                 activity.showToast("Training SDK Started")
             }

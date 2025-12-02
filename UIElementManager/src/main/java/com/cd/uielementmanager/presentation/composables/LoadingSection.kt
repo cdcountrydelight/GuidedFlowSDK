@@ -9,12 +9,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
+
 @Composable
-internal fun LoadingSection() {
+fun LoadingSection() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray),
+        modifier = Modifier.fillMaxSize().background(Color.White.copy(alpha = 0.5f)),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()

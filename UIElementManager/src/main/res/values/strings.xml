@@ -5,4 +5,26 @@
     <string name="something_went_wrong_please_try_again_later">Something went wrong, please try again later</string>
     <string name="no_internet_connection_please_make_sure_your_device_is_connected_to_an_active_internet_connection">No internet connection. Please make sure your device is connected to an active internet connection.</string>
     <string name="dismiss">Dismiss</string>
+    <string name="ok">OK</string>
+    <string name="go_to_home">Go to Home</string>
+
+    <string name="start_next_flow">Start next flow</string>
+    <string name="untitled_flow">Untitled flow</string>
+
+
+    <string name="app_name">ExtractTagApp</string>
+
+    <string name="no_training_flows_available">No training flows available</string>
+    <string name="go_back">Go Back</string>
+    <string name="try_again">Try again</string>
+    <string name="cancel">Cancel</string>
+    <string name="training_platform">Training Platform</string>
+    <string name="available_flows">Available Flows</string>
+    <string name="completed">Completed</string>
+    <string name="pending">Pending</string>
+    <string name="not_started">Not Started</string>
+    <string name="no_description_available">No description available</string>
+    <string name="steps">Steps</string>
+    <string name="there_are_currently_no_training_flows_configured_for_please_check_back_later_or_contact_your_administrator">There are currently no training flows configured for please check back later or contact your administrator</string>
+
 </resources>

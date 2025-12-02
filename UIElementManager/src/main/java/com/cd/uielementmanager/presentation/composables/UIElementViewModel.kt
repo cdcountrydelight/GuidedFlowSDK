@@ -4,25 +4,39 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.view.View
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Rect
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cd.uielementmanager.data.network.HttpClientManager
 import com.cd.uielementmanager.domain.contents.BoundsContent
+import com.cd.uielementmanager.domain.contents.CompleteFlowResponseContent
+import com.cd.uielementmanager.domain.contents.CompleteQnAContent
+import com.cd.uielementmanager.domain.contents.CompleteQnaResponseContent
+import com.cd.uielementmanager.domain.contents.FlowDetailsResponseContent
+import com.cd.uielementmanager.domain.contents.FlowListResponseContent
 import com.cd.uielementmanager.domain.contents.PositionContent
+import com.cd.uielementmanager.domain.contents.QnaResponseContent
 import com.cd.uielementmanager.domain.contents.SizeContent
 import com.cd.uielementmanager.domain.contents.TrainingStepContent
 import com.cd.uielementmanager.domain.contents.UIElementContent
 import com.cd.uielementmanager.domain.domain_utils.AppErrorCodes
 import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
+import com.cd.uielementmanager.domain.use_cases.CompleteQnAUseCase
+import com.cd.uielementmanager.domain.use_cases.GetFlowsListUseCase
+import com.cd.uielementmanager.domain.use_cases.GetQnAUseCase
 import com.cd.uielementmanager.domain.use_cases.GetTrainingFlowUseCase
 import com.cd.uielementmanager.domain.use_cases.SendPackageNameUseCase
 import com.cd.uielementmanager.domain.use_cases.SendUIElementsUseCase
+import com.cd.uielementmanager.domain.use_cases.TrainingCompletedUseCase
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.mapToDataUiResponseStatus
 import com.google.gson.Gson
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +58,8 @@ import java.io.FileOutputStream
  * ViewModel for UI element tracking following clean architecture
  * Matches the pattern from training flow feature
  */
+
+
 class UIElementViewModel() : ViewModel() {
 
     // State flows for tracked elements - organized by screen name
@@ -52,6 +68,7 @@ class UIElementViewModel() : ViewModel() {
 
     internal val trackedElements: StateFlow<Map<String, Map<String, UIElementContent>>> =
         _trackedElements.asStateFlow()
+
 
     private val _sendUiElementsStateFlow: MutableStateFlow<DataUiResponseStatus<Unit>> =
         MutableStateFlow(DataUiResponseStatus.Companion.none())
@@ -74,6 +91,122 @@ class UIElementViewModel() : ViewModel() {
     private var trainingFlowResponseMap = mutableMapOf<String, List<TrainingStepContent>>()
 
     internal var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
+
+    private val _qnaStateFlow: MutableStateFlow<DataUiResponseStatus<QnaResponseContent>> =
+        MutableStateFlow(DataUiResponseStatus.Companion.none())
+
+    val qnaStateFlow = _qnaStateFlow.asStateFlow()
+
+    var selectedQuestionIndex by mutableIntStateOf(0)
+
+    private var authenticationToken: String = ""
+  //   var selectedFlow: FlowDetailsResponseContent? = null
+
+    var selectedFlowId: Int? = null
+        private set
+
+
+    private val _qnaCompleteStateFlow: MutableStateFlow<DataUiResponseStatus<CompleteQnaResponseContent>> =
+        MutableStateFlow(DataUiResponseStatus.Companion.none())
+
+     val qnaCompleteStateFlow = _qnaCompleteStateFlow.asStateFlow()
+
+
+    private val _trainingCompletedStateFlow: MutableStateFlow<DataUiResponseStatus<CompleteFlowResponseContent>> =
+        MutableStateFlow(DataUiResponseStatus.none())
+
+     val completeTrainingStateFlow = _trainingCompletedStateFlow.asStateFlow()
+
+    private val _flowsListDetailStateFlow: MutableStateFlow<DataUiResponseStatus<List<FlowListResponseContent>>> =
+        MutableStateFlow(DataUiResponseStatus.Companion.none())
+
+     val flowsListDetailStateFlow = _flowsListDetailStateFlow.asStateFlow()
+
+    private val _flowDetailsStateFlow: MutableStateFlow<DataUiResponseStatus<FlowDetailsResponseContent>> =
+        MutableStateFlow(DataUiResponseStatus.Companion.none())
+
+    val flowDetailsStateFlow = _flowDetailsStateFlow.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
+
+    fun setSelectedFlow(id: Int?) {
+        selectedFlowId = id
+    }
+//        fun resetAllStates() {
+//        _flowsListDetailStateFlow.value = DataUiResponseStatus.none()
+//        _qnaStateFlow.value = DataUiResponseStatus.none()
+//        selectedQuestionIndex = 0
+//        _qnaCompleteStateFlow.value = DataUiResponseStatus.none()
+//        resetCompleteTraining()
+//    }
+//
+//    fun resetCompleteTraining() {
+//        _trainingCompletedStateFlow.value = DataUiResponseStatus.none()
+//    }
+
+
+
+    fun backgroundCall(
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    operation: suspend () -> Unit,
+) {
+    viewModelScope.launch(dispatcher) {
+        operation()
+    }
+}
+
+
+    fun getFlowsList(context: Context, authToken: String, packageName: String) {
+        authenticationToken = authToken
+        if (_flowsListDetailStateFlow.value is DataUiResponseStatus.Success) return
+        _flowsListDetailStateFlow.value = DataUiResponseStatus.Companion.loading()
+        backgroundCall {
+            _flowsListDetailStateFlow.value =
+                GetFlowsListUseCase().invoke(context, packageName, authenticationToken)
+                    .mapToDataUiResponseStatus()
+        }
+    }
+
+    fun refreshFlowsList(context: Context, authToken: String, packageName: String) {
+        authenticationToken = authToken
+        _isRefreshing.value = true
+        backgroundCall {
+            val result = GetFlowsListUseCase().invoke(context, packageName, authenticationToken)
+                .mapToDataUiResponseStatus()
+            _flowsListDetailStateFlow.value = result
+            _isRefreshing.value = false
+        }
+    }
+
+    fun resetFlowDetailsState() {
+        _flowDetailsStateFlow.value = DataUiResponseStatus.Companion.none()
+    }
+    fun completeTraining(flowId: Int, context: Context) {
+        _trainingCompletedStateFlow.value = DataUiResponseStatus.loading()
+        backgroundCall {
+            _trainingCompletedStateFlow.value =
+                TrainingCompletedUseCase().invoke(context, flowId, authenticationToken)
+                    .mapToDataUiResponseStatus()
+        }
+    }
+
+
+    fun completeQnA(flowId: Int, context: Context, questionsDetails: QnaResponseContent) {
+        _qnaCompleteStateFlow.value = DataUiResponseStatus.loading()
+        backgroundCall {
+            _qnaCompleteStateFlow.value = CompleteQnAUseCase().invoke(
+                context,
+                authenticationToken,
+                flowId,
+                questionsDetails.question.map { question ->
+                    CompleteQnAContent(
+                        question.questionId,
+                        question.selectedOptions.map { it.optionId })
+                }).mapToDataUiResponseStatus()
+        }
+    }
 
     internal fun setCurrentScreen(screen: String) {
         val previousScreen = currentScreen
@@ -222,16 +355,26 @@ class UIElementViewModel() : ViewModel() {
     }
 
 
+    fun getQuestionsList(flowId: Int, context: Context) {
+        _qnaStateFlow.value = DataUiResponseStatus.loading()
+        selectedQuestionIndex = 0
+        backgroundCall {
+            _qnaStateFlow.value =
+                GetQnAUseCase().invoke(context, authenticationToken, flowId)
+                    .mapToDataUiResponseStatus()
+        }
+    }
+
     /**
      * Fetch training flow data from server
      * @param context Application context
      */
-    internal fun fetchTrainingFlow(context: Context, packageName: String) {
+    internal fun fetchTrainingFlow(context: Context, packageName: String, authToken: String) {
         viewModelScope.launch {
             _trainingFlowStateFlow.value = DataUiResponseStatus.loading()
             try {
                 val getTrainingFlowUseCase = GetTrainingFlowUseCase()
-                val response = getTrainingFlowUseCase.invoke(context, packageName)
+                val response = getTrainingFlowUseCase.invoke(context, packageName, authToken)
                     .mapToDataUiResponseStatus()
                 // Reset step index when new flow is loaded
                 if (response is DataUiResponseStatus.Success) {

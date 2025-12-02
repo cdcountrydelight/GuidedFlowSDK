@@ -1,12 +1,19 @@
 package com.cd.uielementmanager.data.network
 
+import com.cd.uielementmanager.data.entities.CompleteFlowResponseEntity
+import com.cd.uielementmanager.data.entities.CompleteQnARequestEntity
+import com.cd.uielementmanager.data.entities.CompleteQnAResponseEntity
+import com.cd.uielementmanager.data.entities.FlowListResponseEntity
 import com.cd.uielementmanager.data.entities.PackageNameResponse
+import com.cd.uielementmanager.data.entities.QnaResponseEntity
 import com.cd.uielementmanager.data.entities.TrainingFlowEntity
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -36,4 +43,30 @@ internal interface UIElementsApiService {
     suspend fun uploadPackageName(
         @Path("packageName") packageName: String
     ): Response<PackageNameResponse>
+
+    @GET("flows/{flow_id}/quiz/")
+    suspend fun getQuizFlow(
+        @Path("flow_id") flowId: Int,
+        @Header("Authorization") token: String
+    ): Response<QnaResponseEntity>
+
+    @POST("flows/{flow_id}/quiz/submit/")
+    suspend fun completeQnA(
+        @Path("flow_id") flowId: Int,
+        @Header("Authorization") token: String,
+        @Body request: CompleteQnARequestEntity
+    ): Response<CompleteQnAResponseEntity>
+
+    @POST("flows/{flow_id}/complete/")
+    suspend fun completeTraining(
+        @Path("flow_id") flowId: Int,
+        @Header("Authorization") token: String,
+    ): Response<CompleteFlowResponseEntity>
+
+    @GET("flows/")
+    suspend fun getFlowList(
+        @Query("app_package") packageName: String,
+        @Header("Authorization") token: String
+    ): Response<List<FlowListResponseEntity>>
+
 }

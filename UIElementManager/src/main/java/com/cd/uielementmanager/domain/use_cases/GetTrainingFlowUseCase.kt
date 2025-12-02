@@ -13,9 +13,10 @@ import com.cd.uielementmanager.domain.repository.IUIElementsRepository
  */
 internal class GetTrainingFlowUseCase {
 
-    suspend fun invoke(context: Context, packageName: String): DataResponseStatus<List<TrainingFlowContent>> {
+    suspend fun invoke(context: Context, packageName: String, authToken: String):
+            DataResponseStatus<List<TrainingFlowContent>> {
         val apiService = HttpClientManager.getApiService(context)
         val repository: IUIElementsRepository = UIElementsRepositoryImpl(apiService)
-        return repository.getTrainingFlow(packageName)
+        return repository.getTrainingFlow(packageName, authToken)
     }
 }

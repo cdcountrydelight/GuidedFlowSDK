@@ -1,6 +1,11 @@
 package com.cd.uielementmanager.domain.repository
 
 import com.cd.uielementmanager.data.entities.PackageNameResponse
+import com.cd.uielementmanager.domain.contents.CompleteFlowResponseContent
+import com.cd.uielementmanager.domain.contents.CompleteQnAContent
+import com.cd.uielementmanager.domain.contents.CompleteQnaResponseContent
+import com.cd.uielementmanager.domain.contents.FlowListResponseContent
+import com.cd.uielementmanager.domain.contents.QnaResponseContent
 import com.cd.uielementmanager.domain.contents.TrainingFlowContent
 import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
 import okhttp3.MultipartBody
@@ -36,9 +41,22 @@ internal interface IUIElementsRepository {
      *
      * @return DataResponseStatus with TrainingFlow data
      */
-    suspend fun getTrainingFlow(packageName: String):DataResponseStatus<List<TrainingFlowContent>>
-
     suspend fun sendPackageName(packageName: String): DataResponseStatus<PackageNameResponse>
+
+    suspend fun getQnADetails(flowId: Int, authToken: String): DataResponseStatus<QnaResponseContent>
+
+    //guided flow
+    suspend fun getFlowsList(packageName: String, authToken: String): DataResponseStatus<List<FlowListResponseContent>>
+
+    suspend fun getTrainingFlow(packageName: String, authToken: String):DataResponseStatus<List<TrainingFlowContent>>
+
+    suspend fun completeQnA(
+        flowId: Int,
+        completeQnAList: List<CompleteQnAContent>,
+        authToken: String
+    ): DataResponseStatus<CompleteQnaResponseContent>
+
+    suspend fun completeTraining(flowId: Int, authToken: String): DataResponseStatus<CompleteFlowResponseContent>
 
 
 }
