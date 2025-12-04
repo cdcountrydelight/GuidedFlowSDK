@@ -43,20 +43,19 @@ internal interface IUIElementsRepository {
      */
     suspend fun sendPackageName(packageName: String): DataResponseStatus<PackageNameResponse>
 
-    suspend fun getQnADetails(flowId: Int, authToken: String): DataResponseStatus<QnaResponseContent>
+    suspend fun getQnADetails(flowId: Int): DataResponseStatus<QnaResponseContent>
 
     //guided flow
-    suspend fun getFlowsList(packageName: String, authToken: String): DataResponseStatus<List<FlowListResponseContent>>
+    suspend fun getFlowsList(packageName: String): DataResponseStatus<List<FlowListResponseContent>>
 
     suspend fun getTrainingFlow(packageName: String, authToken: String):DataResponseStatus<List<TrainingFlowContent>>
 
     suspend fun completeQnA(
         flowId: Int,
         completeQnAList: List<CompleteQnAContent>,
-        authToken: String
     ): DataResponseStatus<CompleteQnaResponseContent>
 
-    suspend fun completeTraining(flowId: Int, authToken: String): DataResponseStatus<CompleteFlowResponseContent>
+    suspend fun completeTraining(flowId: Int): DataResponseStatus<CompleteFlowResponseContent>
 
 
 }

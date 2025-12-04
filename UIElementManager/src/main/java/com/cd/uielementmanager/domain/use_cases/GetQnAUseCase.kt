@@ -10,11 +10,10 @@ import com.cd.uielementmanager.domain.repository.IUIElementsRepository
 internal class GetQnAUseCase {
     suspend fun invoke(
         context: Context,
-        authToken: String,
-        flowId: Int
+        flowId: Int,
     ): DataResponseStatus<QnaResponseContent> {
         val apiService = HttpClientManager.getApiService(context)
         val repository: IUIElementsRepository = UIElementsRepositoryImpl(apiService)
-        return repository.getQnADetails(flowId, authToken)
+        return repository.getQnADetails(flowId)
     }
 }

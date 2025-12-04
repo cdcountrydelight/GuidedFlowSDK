@@ -11,11 +11,10 @@ class TrainingCompletedUseCase {
 
     suspend fun invoke(
         context: Context,
-        flowId: Int,
-        authToken: String
+        flowId: Int
     ): DataResponseStatus<CompleteFlowResponseContent> {
         val apiService = HttpClientManager.getApiService(context)
         val repository: IUIElementsRepository = UIElementsRepositoryImpl(apiService)
-        return repository.completeTraining(flowId, authToken)
+        return repository.completeTraining(flowId)
     }
 }

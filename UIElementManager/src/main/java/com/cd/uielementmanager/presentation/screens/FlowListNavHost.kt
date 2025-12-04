@@ -1,38 +1,38 @@
 package com.cd.uielementmanager.presentation.screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 import com.cd.uielementmanager.presentation.utils.CompletedTrainingScreenDestination
 import com.cd.uielementmanager.presentation.utils.FlowListScreenDestination
 import com.cd.uielementmanager.presentation.utils.QnAScreenDestination
+import com.cd.uielementmanager.presentation.viewmodels.QuizViewModel
 
 @Composable
 fun FlowListNavHost(
     appName: String,
     packageName: String,
     authToken: String,
+    viewModel: QuizViewModel = viewModel(),
+    isProdEnv: Boolean,
     onClosed: () -> Unit,
 ) {
     val navController = rememberNavController()
-    val viewModel: UIElementViewModel = viewModel()
     NavHost(
         navController = navController,
         startDestination = FlowListScreenDestination,
     ) {
-
         composable<FlowListScreenDestination> {
             FlowListScreen(
-                authToken = authToken,
                 appName = appName,
                 packageName = packageName,
                 viewModel = viewModel,
                 onFlowSelected = {
-                    navController.navigate(QnAScreenDestination())
+                    navController.navigate(QnAScreenDestination)
                 },
                 onBackClicked = onClosed
             )
@@ -42,7 +42,7 @@ fun FlowListNavHost(
                 viewModel = viewModel,
                 onNavigateToCompleteTraining = {
                     navController.navigate(CompletedTrainingScreenDestination(it ?: 0.0)) {
-                        popUpTo(FlowListScreenDestination) { inclusive = true }
+                        popUpTo(FlowListScreenDestination) { inclusive = false }
                     }
                 },
                 onBackRequested = {
@@ -59,19 +59,14 @@ fun FlowListNavHost(
                 calculatedScore = calculatedScore ?: 0.0,
                 onStartNextFlow = {
                     navController.popBackStack()
-                    navController.navigate(FlowListScreenDestination)
-                    //navController.popBackStack(FlowListScreenDestination, false)
                 },
                 onBackButton = {
-                        navController.popBackStack()
-                        navController.navigate(FlowListScreenDestination)
+                    navController.popBackStack()
                 },
-                onGoToHome = {
-                    navController.popBackStack(FlowListScreenDestination, false)
-                }
-
-
             )
         }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.initData(authToken, isProdEnv)
     }
 }

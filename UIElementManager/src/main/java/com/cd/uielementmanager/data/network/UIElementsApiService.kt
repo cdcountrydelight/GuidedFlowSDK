@@ -13,7 +13,6 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -33,7 +32,7 @@ internal interface UIElementsApiService {
         @Part("screen_name") screenName: RequestBody,
         @Part("timestamp") timestamp: RequestBody,
         @Part("screen_info") screenInfo: RequestBody,
-        @Part("elements") elements: RequestBody
+        @Part("elements") elements: RequestBody,
     ): Response<ResponseBody>
 
     @GET("guided-flows/")
@@ -41,32 +40,26 @@ internal interface UIElementsApiService {
 
     @GET("guided-flows/active/{packageName}/")
     suspend fun uploadPackageName(
-        @Path("packageName") packageName: String
+        @Path("packageName") packageName: String,
     ): Response<PackageNameResponse>
 
     @GET("flows/{flow_id}/quiz/")
-    suspend fun getQuizFlow(
-        @Path("flow_id") flowId: Int,
-        @Header("Authorization") token: String
-    ): Response<QnaResponseEntity>
+    suspend fun getQuizFlow(@Path("flow_id") flowId: Int): Response<QnaResponseEntity>
 
     @POST("flows/{flow_id}/quiz/submit/")
     suspend fun completeQnA(
         @Path("flow_id") flowId: Int,
-        @Header("Authorization") token: String,
-        @Body request: CompleteQnARequestEntity
+        @Body request: CompleteQnARequestEntity,
     ): Response<CompleteQnAResponseEntity>
 
     @POST("flows/{flow_id}/complete/")
     suspend fun completeTraining(
         @Path("flow_id") flowId: Int,
-        @Header("Authorization") token: String,
     ): Response<CompleteFlowResponseEntity>
 
     @GET("flows/")
     suspend fun getFlowList(
         @Query("app_package") packageName: String,
-        @Header("Authorization") token: String
     ): Response<List<FlowListResponseEntity>>
 
 }

@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 
 /**
  * Composition local for accessing the UIElementTrackerViewModel

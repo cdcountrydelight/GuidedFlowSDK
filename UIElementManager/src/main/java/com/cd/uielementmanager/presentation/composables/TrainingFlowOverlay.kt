@@ -60,6 +60,7 @@ import com.cd.uielementmanager.domain.contents.TrainingStepContent
 import com.cd.uielementmanager.domain.contents.UIElementContent
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.TextToSpeechManager
+import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.min

@@ -11,13 +11,11 @@ import com.cd.uielementmanager.domain.repository.IUIElementsRepository
 class CompleteQnAUseCase {
     suspend fun invoke(
         context: Context,
-        authToken: String,
         flowId: Int,
         completeQnAContent: List<CompleteQnAContent>
     ): DataResponseStatus<CompleteQnaResponseContent> {
         val apiService = HttpClientManager.getApiService(context)
         val repository: IUIElementsRepository = UIElementsRepositoryImpl(apiService)
-      //  return getTrainingFlowRepository(context, authToken).completeQnA(flowId, completeQnAContent)
-        return repository.completeQnA(flowId,completeQnAContent, authToken = authToken)
+        return repository.completeQnA(flowId,completeQnAContent)
     }
 }

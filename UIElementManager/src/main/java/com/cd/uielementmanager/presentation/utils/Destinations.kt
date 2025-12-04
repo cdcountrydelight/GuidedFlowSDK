@@ -7,7 +7,7 @@ internal object FlowListScreenDestination
 
 
 @Serializable
-internal class QnAScreenDestination
+internal object QnAScreenDestination
 
 @Serializable
 internal class CompletedTrainingScreenDestination(val calculatedScore: Double?)

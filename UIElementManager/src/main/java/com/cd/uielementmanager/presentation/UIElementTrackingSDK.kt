@@ -7,7 +7,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.core.net.toUri
 import com.cd.uielementmanager.data.network.HttpClientManager
-import com.cd.uielementmanager.presentation.composables.UIElementViewModel
+import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 import com.cd.uielementmanager.presentation.service.UIElementTrackingService
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.showToast
 import com.cd.uielementmanager.presentation.utils.ViewModelHelper

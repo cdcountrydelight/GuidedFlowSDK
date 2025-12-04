@@ -9,7 +9,7 @@ import android.view.View
 import android.view.WindowManager
 import com.cd.uielementmanager.domain.contents.UIElementContent
 import com.cd.uielementmanager.presentation.ScreenshotHelper
-import com.cd.uielementmanager.presentation.composables.UIElementViewModel
+import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.showToast
 import kotlinx.coroutines.CoroutineScope

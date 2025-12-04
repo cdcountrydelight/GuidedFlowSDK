@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -66,21 +64,20 @@ import com.cd.uielementmanager.presentation.composables.ErrorAlertDialog
 import com.cd.uielementmanager.presentation.composables.LoadingSection
 import com.cd.uielementmanager.presentation.composables.SpacerHeight12s
 import com.cd.uielementmanager.presentation.composables.SpacerHeight16s
-import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.getErrorMessage
+import com.cd.uielementmanager.presentation.viewmodels.QuizViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.sin
 import kotlin.random.Random
 
 
 @Composable
-fun CompletedTrainingScreen(
-    viewModel: UIElementViewModel,
+internal fun CompletedTrainingScreen(
+    viewModel: QuizViewModel,
     calculatedScore: Double,
     onStartNextFlow: () -> Unit,
     onBackButton: () -> Unit,
-    onGoToHome: () -> Unit
 ) {
     val context = LocalContext.current
     Scaffold {
@@ -102,10 +99,10 @@ fun CompletedTrainingScreen(
 
 @Composable
 private fun HandleTrainingCompletedStateFlow(
-    viewModel: UIElementViewModel,
+    viewModel: QuizViewModel,
     calculatedScore: Double?,
     onStartNextFlow: () -> Unit,
-    onBackRequested: () -> Unit
+    onBackRequested: () -> Unit,
 ) {
     val flowDetailsStateFlow = viewModel.completeTrainingStateFlow.collectAsStateWithLifecycle()
 
@@ -123,7 +120,6 @@ private fun HandleTrainingCompletedStateFlow(
                 viewModel,
                 response.data.flowName,
                 calculatedScore,
-                onGoToHome={},
                 onStartNextFlow = onStartNextFlow
             )
         }
@@ -153,11 +149,10 @@ private fun HandleTrainingCompletedStateFlow(
 
 @Composable
 private fun TrainingCompletedSection(
-    viewModel: UIElementViewModel,
+    viewModel: QuizViewModel,
     flowName: String?,
     calculatedScore: Double?,
-    onGoToHome: () -> Unit,
-    onStartNextFlow: () -> Unit
+    onStartNextFlow: () -> Unit,
 ) {
     var showContent by remember { mutableStateOf(false) }
     val infiniteTransition = rememberInfiniteTransition(label = "background")
@@ -222,36 +217,10 @@ private fun TrainingCompletedSection(
                         .padding(top = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Primary button with gradient
-                    Button(
-                        onClick = {
-                            //viewModel.resetCompleteTraining()
-                            onGoToHome()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(60.dp),
-                        shape = RoundedCornerShape(30.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 8.dp,
-                            pressedElevation = 12.dp
-                        )
-                    ) {
-                        Text(
-                            text = stringResource(R.string.go_to_home),
-                            color = Color.White,
-                            fontSize = 17.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
                     // Secondary button with outline
                     TextButton(
                         onClick = {
-                        //    viewModel.resetCompleteTraining()
+                            viewModel.resetAllStates()
                             onStartNextFlow()
                         },
                         modifier = Modifier
@@ -614,5 +583,5 @@ private data class ConfettiParticle(
     val size: Float,
     val velocity: Float,
     val angle: Float,
-    val cycleCount: Int = 0
+    val cycleCount: Int = 0,
 )

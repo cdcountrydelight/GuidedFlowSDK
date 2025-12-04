@@ -26,9 +26,6 @@ internal object HttpClientManager {
     fun initializeDetails(authToken: String?, isProdEnvironment: Boolean) {
         this.authToken = authToken
         this.isProdEnvironment = isProdEnvironment
-
-         // Force recreation of Retrofit + OkHttpClient with new token
-
         retrofit = null
         apiService = null
     }

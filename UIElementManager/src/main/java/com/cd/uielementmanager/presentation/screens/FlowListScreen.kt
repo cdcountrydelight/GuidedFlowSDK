@@ -1,6 +1,5 @@
 package com.cd.uielementmanager.presentation.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -55,7 +54,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cd.uielementmanager.R
-
 import com.cd.uielementmanager.domain.contents.FlowListResponseContent
 import com.cd.uielementmanager.presentation.beans.ButtonHandlerBean
 import com.cd.uielementmanager.presentation.composables.EmptySection
@@ -63,17 +61,16 @@ import com.cd.uielementmanager.presentation.composables.ErrorAlertDialog
 import com.cd.uielementmanager.presentation.composables.LoadingSection
 import com.cd.uielementmanager.presentation.composables.SpacerHeight8s
 import com.cd.uielementmanager.presentation.composables.SpacerWidth4s
-import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.getErrorMessage
+import com.cd.uielementmanager.presentation.viewmodels.QuizViewModel
 
 
 @Composable
 internal fun FlowListScreen(
-    authToken: String,
     appName: String,
     packageName: String,
-    viewModel: UIElementViewModel,
+    viewModel: QuizViewModel,
     onFlowSelected: () -> Unit,
     onBackClicked: () -> Unit,
 ) {
@@ -84,26 +81,24 @@ internal fun FlowListScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         HandleFlowListStateFlow(
-            authToken = authToken,
             viewModel = viewModel,
             appName = appName,
             packageName = packageName,
             onBackClicked = onBackClicked,
-            onFlowSelected=onFlowSelected
+            onFlowSelected = onFlowSelected
         )
 
     }
     LaunchedEffect(Unit) {
-        viewModel.getFlowsList(context, authToken, packageName)
+        viewModel.getFlowsList(context, packageName)
     }
 }
 
 @Composable
 private fun HandleFlowListStateFlow(
-    authToken: String,
     appName: String,
     packageName: String,
-    viewModel: UIElementViewModel,
+    viewModel: QuizViewModel,
     onBackClicked: () -> Unit,
     onFlowSelected: () -> Unit,
 ) {
@@ -112,7 +107,6 @@ private fun HandleFlowListStateFlow(
     var isResponseHandled by remember { mutableStateOf(false) }
     when (val response = flowListResponseState.value) {
         is DataUiResponseStatus.Loading -> {
-            // Show loading section for first load, but for refresh keep existing data visible
             isResponseHandled = false
             LoadingSection()
         }
@@ -133,9 +127,8 @@ private fun HandleFlowListStateFlow(
                     appName = appName,
                     flows = response.data,
                     viewModel = viewModel,
-                    authToken = authToken,
                     packageName = packageName,
-                    onFlowSelected=onFlowSelected
+                    onFlowSelected = onFlowSelected
                 )
             }
         }
@@ -151,7 +144,7 @@ private fun HandleFlowListStateFlow(
                         buttonText = stringResource(R.string.ok),
                         onButtonClicked = {
                             isResponseHandled = true
-                            viewModel.getFlowsList(context, authToken, packageName)
+                            viewModel.getFlowsList(context, packageName)
                         }
                     ),
                     negativeButton = ButtonHandlerBean(
@@ -175,19 +168,17 @@ private fun HandleFlowListStateFlow(
 private fun FlowsList(
     appName: String,
     flows: List<FlowListResponseContent>,
-    viewModel: UIElementViewModel,
-    authToken: String,
+    viewModel: QuizViewModel,
     packageName: String,
     onFlowSelected: () -> Unit,
 ) {
 
     val context = LocalContext.current
     val isRefreshingState = viewModel.isRefreshing.collectAsStateWithLifecycle()
-
     PullToRefreshBox(
         isRefreshing = isRefreshingState.value,
         onRefresh = {
-            viewModel.refreshFlowsList(context, authToken, packageName)
+            viewModel.refreshFlowsList(context, packageName)
         },
         modifier = Modifier.fillMaxSize()
     ) {
@@ -302,7 +293,7 @@ private fun HeaderSection(appName: String, modifier: Modifier) {
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(com.cd.uielementmanager.R.drawable.app_logo),
+                    painter = painterResource(R.drawable.app_logo),
                     contentDescription = "App Logo",
                     modifier = Modifier.size(50.dp),
                     contentScale = ContentScale.Fit
@@ -475,7 +466,8 @@ private fun FlowItem(
 
                 SpacerWidth4s()
                 Text(
-                    text = flow.description?.ifBlank { stringResource(R.string.no_description_available) } ?: stringResource(R.string.no_description_available),
+                    text = flow.description?.ifBlank { stringResource(R.string.no_description_available) }
+                        ?: stringResource(R.string.no_description_available),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1

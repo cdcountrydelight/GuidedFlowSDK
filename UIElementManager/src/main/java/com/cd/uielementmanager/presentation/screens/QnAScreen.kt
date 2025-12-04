@@ -1,6 +1,5 @@
 package com.cd.uielementmanager.presentation.screens
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cd.uielementmanager.R
-
 import com.cd.uielementmanager.domain.contents.OptionsContent
 import com.cd.uielementmanager.domain.contents.QnaResponseContent
 import com.cd.uielementmanager.presentation.beans.ButtonHandlerBean
@@ -47,17 +45,16 @@ import com.cd.uielementmanager.presentation.composables.ErrorAlertDialog
 import com.cd.uielementmanager.presentation.composables.LoadingSection
 import com.cd.uielementmanager.presentation.composables.SpacerHeight12s
 import com.cd.uielementmanager.presentation.composables.SpacerHeight16s
-import com.cd.uielementmanager.presentation.composables.UIElementViewModel
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.getErrorMessage
+import com.cd.uielementmanager.presentation.viewmodels.QuizViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun QnAScreen(
-    viewModel: UIElementViewModel,
+    viewModel: QuizViewModel,
     onNavigateToCompleteTraining: (calculatedScore: Double?) -> Unit,
-    onBackRequested: () -> Unit
-
+    onBackRequested: () -> Unit,
 ) {
     val context = LocalContext.current
     Scaffold(topBar = {
@@ -76,21 +73,24 @@ internal fun QnAScreen(
                 onBackRequested = onBackRequested
             )
 
-            HandleQuestionAndAnswerCompleteStateFlow(viewModel, onNavigateToCompleteTraining, onBackRequested)
+            HandleQuestionAndAnswerCompleteStateFlow(
+                viewModel,
+                onNavigateToCompleteTraining,
+                onBackRequested
+            )
         }
     }
-    LaunchedEffect(Unit) { //getQuestionsList
+    LaunchedEffect(Unit) {
         viewModel.getQuestionsList(viewModel.selectedFlowId ?: 0, context)
-
     }
 }
 
 
 @Composable
 private fun HandleQuestionAndAnswerStateFlow(
-    viewModel: UIElementViewModel,
+    viewModel: QuizViewModel,
     onNavigateToCompleteTraining: (Double?) -> Unit,
-    onBackRequested: () -> Unit
+    onBackRequested: () -> Unit,
 ) {
     val qnaStateFlow = viewModel.qnaStateFlow.collectAsStateWithLifecycle()
 
@@ -98,7 +98,6 @@ private fun HandleQuestionAndAnswerStateFlow(
     val context = LocalContext.current
 
     when (val response = qnaStateFlow.value) {
-
         is DataUiResponseStatus.Loading -> {
             isResponseHandled = false
             LoadingSection()
@@ -109,8 +108,9 @@ private fun HandleQuestionAndAnswerStateFlow(
                 onNavigateToCompleteTraining(response.data.calculatedScore)
                 isResponseHandled = true
                 return
+            } else {
+                QnASection(response.data, viewModel)
             }
-            QnASection(response.data, viewModel)
         }
 
         is DataUiResponseStatus.Failure -> {
@@ -138,9 +138,9 @@ private fun HandleQuestionAndAnswerStateFlow(
 
 @Composable
 private fun HandleQuestionAndAnswerCompleteStateFlow(
-    viewModel: UIElementViewModel,
+    viewModel: QuizViewModel,
     onNavigateToCompleteTraining: (calculatedScore: Double?) -> Unit,
-    onBackRequested: () -> Unit
+    onBackRequested: () -> Unit,
 ) {
 
     val qnaCompleteStateFlow = viewModel.qnaCompleteStateFlow.collectAsStateWithLifecycle()
@@ -184,7 +184,7 @@ private fun HandleQuestionAndAnswerCompleteStateFlow(
 }
 
 @Composable
-private fun QnASection(data: QnaResponseContent, viewModel: UIElementViewModel) {
+private fun QnASection(data: QnaResponseContent, viewModel: QuizViewModel) {
     val selectedQuestion = data.question.getOrNull(viewModel.selectedQuestionIndex) ?: return
     val selectedOptions = remember {
         mutableStateListOf<OptionsContent>()
@@ -244,11 +244,7 @@ private fun QnASection(data: QnaResponseContent, viewModel: UIElementViewModel) 
                     if (viewModel.selectedQuestionIndex < data.question.size - 1) {
                         viewModel.selectedQuestionIndex++
                     } else {
-
-//                        viewModel.completeQnA(viewModel.selectedFlow?.id ?: 0, context, data)
-//                        Log.d("selectedFlow4", "FlowListNavHost: ${viewModel.selectedFlow?.id} ")
-                        viewModel.completeQnA(viewModel.selectedFlowId ?: 0, context,data)
-
+                        viewModel.completeQnA(viewModel.selectedFlowId ?: 0, context, data)
                     }
                 }
             }) {
@@ -283,7 +279,7 @@ private fun ProgressBarSections(currentQuestion: Int, questionCount: Int) {
 private fun SingleSelectionOptions(
     options: List<OptionsContent>,
     selectedOptionsList: List<OptionsContent>,
-    onOptionSelected: (OptionsContent) -> Unit
+    onOptionSelected: (OptionsContent) -> Unit,
 ) {
     Column(Modifier.selectableGroup()) {
         options.forEach { option ->
@@ -298,7 +294,7 @@ private fun SingleSelectionOptions(
 private fun MultipleSelectionOptions(
     options: List<OptionsContent>,
     selectedOptionsList: List<OptionsContent>,
-    onOptionSelectionChanged: (OptionsContent, Boolean) -> Unit
+    onOptionSelectionChanged: (OptionsContent, Boolean) -> Unit,
 ) {
     Column(Modifier.selectableGroup()) {
         options.forEach { option ->
@@ -314,7 +310,7 @@ private fun OptionItem(
     isMsq: Boolean,
     isSelected: Boolean,
     optionText: String,
-    onOptionSelectionChanged: (Boolean) -> Unit
+    onOptionSelectionChanged: (Boolean) -> Unit,
 ) {
     Row(
         modifier = Modifier
