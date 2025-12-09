@@ -10,5 +10,11 @@ internal data class TrainingFlowEntity(
     @SerializedName("step_count")
     val stepCount: Int?,
     @SerializedName("steps")
-    val steps: List<TrainingStepEntity>?
+    val steps: List<TrainingStepEntity>?,
+    @SerializedName("description")
+    val description: String?,
+    @SerializedName("is_active")
+    val isActive: Boolean? = null,
+    @SerializedName("user_progress")
+    val userProgress: UserProgressResponseEntity? = null,
 )

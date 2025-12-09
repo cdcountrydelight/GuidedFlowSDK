@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Rect
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cd.uielementmanager.data.network.HttpClientManager
 import com.cd.uielementmanager.domain.contents.BoundsContent
@@ -146,8 +145,8 @@ class UIElementViewModel : BaseViewModel() {
 
     internal fun startFlow(flowId: String?, context: Context) {
         if (flowId == null) return
-        viewModelScope.launch(Dispatchers.IO) {
-            if (alreadyStartedFlows.contains(flowId)) return@launch
+        backgroundCall {
+            if (alreadyStartedFlows.contains(flowId)) return@backgroundCall
             val response = StartFlowUseCase().invoke(flowId, context)
             if (response is DataResponseStatus.Success) {
                 alreadyStartedFlows.add(flowId)
@@ -165,7 +164,7 @@ class UIElementViewModel : BaseViewModel() {
             return
         }
         _sendUiElementsStateFlow.value = DataUiResponseStatus.loading()
-        viewModelScope.launch {
+        backgroundCall {
             _sendUiElementsStateFlow.value = try {
                 val sendPackageNameUseCase = SendPackageNameUseCase()
                 val response = sendPackageNameUseCase.invoke(packageName, context)
@@ -245,12 +244,12 @@ class UIElementViewModel : BaseViewModel() {
      * Fetch training flow data from server
      * @param context Application context
      */
-    internal fun fetchTrainingFlow(context: Context, packageName: String, authToken: String) {
-        viewModelScope.launch {
+    internal fun fetchTrainingFlow(context: Context, packageName: String) {
+        backgroundCall {
             _trainingFlowStateFlow.value = DataUiResponseStatus.loading()
             try {
                 val getTrainingFlowUseCase = GetTrainingFlowUseCase()
-                val response = getTrainingFlowUseCase.invoke(context, packageName, authToken)
+                val response = getTrainingFlowUseCase.invoke(context, packageName)
                     .mapToDataUiResponseStatus()
                 // Reset step index when new flow is loaded
                 if (response is DataUiResponseStatus.Success) {

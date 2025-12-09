@@ -11,13 +11,18 @@ internal class TrainingFlowMapper : IBaseMapper<TrainingFlowEntity, TrainingFlow
 
     private val trainingStepMapper = TrainingStepMapper()
 
+    private val userProgressMapper = UserProgressDetailsMapper()
+
     override fun mapData(data: TrainingFlowEntity): TrainingFlowContent {
         return TrainingFlowContent(
             id = data.id,
             name = data.name,
             stepCount = data.stepCount,
             steps = data.steps?.mapNotNull { trainingStepMapper.mapData(it) }
-                ?.sortedBy { it.stepNumber } ?: arrayListOf()
+                ?.sortedBy { it.stepNumber } ?: arrayListOf(),
+            description = data.description,
+            isActive = data.isActive,
+            userProgress = data.userProgress?.let { userProgressMapper.mapData(it) }
         )
     }
 }

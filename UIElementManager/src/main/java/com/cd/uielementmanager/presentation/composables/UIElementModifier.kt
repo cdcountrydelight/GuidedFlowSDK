@@ -33,8 +33,8 @@ val LocalUIElementViewModel = compositionLocalOf<UIElementViewModel?> { null }
 @Composable
 fun Modifier.trackElement(screenName: String, tag: String): Modifier {
     val view = LocalView.current
-    val elementTracker = LocalUIElementViewModel.current
-    if (elementTracker == null) {
+    val uIElementViewModel = LocalUIElementViewModel.current
+    if (uIElementViewModel == null) {
         return this
     }
     return this
@@ -43,8 +43,8 @@ fun Modifier.trackElement(screenName: String, tag: String): Modifier {
         }
         .onGloballyPositioned { coordinates ->
             if (coordinates.isAttached) {
-                val bounds = coordinates.boundsInWindow(elementTracker.removeStatusBarHeight, view)
-                elementTracker.registerElement(screenName, tag, bounds)
+                val bounds = coordinates.boundsInWindow(uIElementViewModel.removeStatusBarHeight, view)
+                uIElementViewModel.registerElement(screenName, tag, bounds)
             }
         }
 }

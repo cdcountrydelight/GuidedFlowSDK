@@ -3,7 +3,6 @@ package com.cd.uielementmanager.data.network
 import com.cd.uielementmanager.data.entities.CompleteFlowResponseEntity
 import com.cd.uielementmanager.data.entities.CompleteQnARequestEntity
 import com.cd.uielementmanager.data.entities.CompleteQnAResponseEntity
-import com.cd.uielementmanager.data.entities.FlowListResponseEntity
 import com.cd.uielementmanager.data.entities.PackageNameResponse
 import com.cd.uielementmanager.data.entities.QnaResponseEntity
 import com.cd.uielementmanager.data.entities.TrainingFlowEntity
@@ -52,16 +51,10 @@ internal interface UIElementsApiService {
         @Body request: CompleteQnARequestEntity,
     ): Response<CompleteQnAResponseEntity>
 
-    @POST("flows/{flow_id}/complete/")
+    @POST("guided-flows/{flow_id}/complete/")
     suspend fun completeTraining(
         @Path("flow_id") flowId: Int,
     ): Response<CompleteFlowResponseEntity>
-
-    @GET("flows/")
-    suspend fun getFlowList(
-        @Query("app_package") packageName: String,
-    ): Response<List<FlowListResponseEntity>>
-
 
     @GET("guided-flows/{flowId}/")
     suspend fun startFlow(@Path("flowId") flowId: String): Response<Unit>
