@@ -35,7 +35,7 @@ internal interface IUIElementsRepository {
         screenInfoPart: RequestBody,
         elementsPart: RequestBody
     ): DataResponseStatus<Unit>
-    
+
     /**
      * Get training flow data by ID
      *
@@ -56,6 +56,9 @@ internal interface IUIElementsRepository {
     ): DataResponseStatus<CompleteQnaResponseContent>
 
     suspend fun completeTraining(flowId: Int): DataResponseStatus<CompleteFlowResponseContent>
+
+
+    suspend fun startFlow(flowId: String): DataResponseStatus<Unit>
 
 
 }

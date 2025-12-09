@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Rect
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cd.uielementmanager.data.network.HttpClientManager
 import com.cd.uielementmanager.domain.contents.BoundsContent
@@ -16,6 +17,7 @@ import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
 import com.cd.uielementmanager.domain.use_cases.GetTrainingFlowUseCase
 import com.cd.uielementmanager.domain.use_cases.SendPackageNameUseCase
 import com.cd.uielementmanager.domain.use_cases.SendUIElementsUseCase
+import com.cd.uielementmanager.domain.use_cases.StartFlowUseCase
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.mapToDataUiResponseStatus
 import com.google.gson.Gson
@@ -72,14 +74,22 @@ class UIElementViewModel : BaseViewModel() {
 
     internal var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
 
+    internal var alreadyStartedFlows = mutableSetOf<String>()
 
-    internal fun setCurrentScreen(screen: String) {
+
+    internal var removeStatusBarHeight = false
+
+    internal fun setCurrentScreen(screen: String, context: Context) {
         val previousScreen = currentScreen
         currentScreen = screen
         viewModelScope.launch {
-            delay(200)
+            delay(300)
             currentScreenStepsList.clear()
-            currentScreenStepsList.addAll(trainingFlowResponseMap[screen] ?: arrayListOf())
+            val currentSteps = trainingFlowResponseMap[screen] ?: arrayListOf()
+            currentScreenStepsList.addAll(currentSteps)
+            if (currentSteps.isNotEmpty()) {
+                startFlow(currentSteps.getOrNull(0)?.flowId, context)
+            }
         }
         if (previousScreen != null && previousScreen != screen) {
             clearElementsForScreen(previousScreen)
@@ -131,6 +141,18 @@ class UIElementViewModel : BaseViewModel() {
     internal fun getTrackedElements(): Map<String, UIElementContent> {
         val screenName = currentScreen ?: return emptyMap()
         return _trackedElements.value[screenName] ?: emptyMap()
+    }
+
+
+    internal fun startFlow(flowId: String?, context: Context) {
+        if (flowId == null) return
+        viewModelScope.launch(Dispatchers.IO) {
+            if (alreadyStartedFlows.contains(flowId)) return@launch
+            val response = StartFlowUseCase().invoke(flowId, context)
+            if (response is DataResponseStatus.Success) {
+                alreadyStartedFlows.add(flowId)
+            }
+        }
     }
 
 

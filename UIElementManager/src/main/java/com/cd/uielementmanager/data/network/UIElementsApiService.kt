@@ -62,4 +62,7 @@ internal interface UIElementsApiService {
         @Query("app_package") packageName: String,
     ): Response<List<FlowListResponseEntity>>
 
+
+    @GET("guided-flows/{flowId}/")
+    suspend fun startFlow(@Path("flowId") flowId: String): Response<Unit>
 }

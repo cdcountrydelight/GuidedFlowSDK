@@ -15,5 +15,7 @@ internal data class TrainingStepEntity(
     @SerializedName("highlighted_element")
     val highlightedElement: HighlightedElementEntity?,
     @SerializedName("instructions")
-    val instructions: List<String>?
+    val instructions: List<String>?,
+    @SerializedName("flow_id")
+    val flowId: String?
 )

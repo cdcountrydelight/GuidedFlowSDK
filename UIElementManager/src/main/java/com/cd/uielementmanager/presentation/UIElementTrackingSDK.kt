@@ -21,6 +21,7 @@ object UIElementTrackingSDK {
         viewModel: UIElementViewModel,
         authToken: String?,
         isProdEnvironment: Boolean,
+        removeStatusBarHeight: Boolean = false,
         onSDKInitialized: () -> Unit
     ) {
         if (!Settings.canDrawOverlays(activity)) {
@@ -28,6 +29,7 @@ object UIElementTrackingSDK {
         }
         if (isSenderSDKRunning()) return
         try {
+            viewModel.removeStatusBarHeight = removeStatusBarHeight
             ViewModelHelper.viewModel = viewModel
             HttpClientManager.initializeDetails(authToken, isProdEnvironment)
             onSDKInitialized()
@@ -42,9 +44,10 @@ object UIElementTrackingSDK {
         isProdEnvironment: Boolean,
         resultCode: Int,
         resultData: Intent?,
-        packageName: String? = null
+        packageName: String? = null,
+        removeStatusBarHeight: Boolean = false
     ) {
-        initializeSDK(activity, viewModel, null, isProdEnvironment) {
+        initializeSDK(activity, viewModel, null, isProdEnvironment, removeStatusBarHeight) {
             val intent = Intent(activity, UIElementTrackingService::class.java)
             intent.putExtra("packageName", packageName ?: activity.packageName)
             intent.putExtra("resultCode", resultCode)
@@ -62,10 +65,11 @@ object UIElementTrackingSDK {
         viewModel: UIElementViewModel,
         authToken: String,
         isProdEnvironment: Boolean,
-        packageName: String? = null
+        packageName: String? = null,
+        removeStatusBarHeight: Boolean = false
     ) {
-        initializeSDK(activity, viewModel, authToken, isProdEnvironment) {
-            viewModel.fetchTrainingFlow(activity, packageName ?: activity.packageName, authToken)
+        initializeSDK(activity, viewModel, authToken, isProdEnvironment, removeStatusBarHeight) {
+            viewModel.fetchTrainingFlow(activity, packageName ?: activity.packageName)
             if (!isProdEnvironment) {
                 activity.showToast("Training SDK Started")
             }

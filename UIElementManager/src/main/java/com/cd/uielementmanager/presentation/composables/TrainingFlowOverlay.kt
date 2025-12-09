@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -128,7 +127,7 @@ private fun StepDetails(
     if (currentStep != null) {
         val currentScreenElements = trackedElements[currentStep.screenName]
         val elementToHighlight =
-            currentScreenElements?.get("back_button")
+            currentScreenElements?.get(currentStep.highlightedElementContent.elementId)
         if (elementToHighlight != null) {
             val xDp = with(density) { elementToHighlight.bounds.position.x.toDp() }
             val yDp = with(density) { elementToHighlight.bounds.position.y.toDp() }
@@ -167,52 +166,6 @@ private fun StepDetails(
                                 color = borderColor,
                                 shape = shape
                             )
-//                            .pointerInput(Unit) {
-//                                awaitPointerEventScope {
-//                                    while (true) {
-//                                        val event = awaitPointerEvent()
-//
-//                                        // Detect if it’s a tap (down + up within threshold)
-//                                        val pressed = event.changes.firstOrNull()
-//                                        if (pressed != null && pressed.changedToUpIgnoreConsumed()) {
-//                                            // ✅ You can handle your logic here
-//                                            println("Overlay tapped at: ${pressed.position}")
-//
-//                                            // DO NOT call pressed.consume()
-//                                            // this lets the event propagate to underlying composables
-//                                        }
-//                                        // 🛑 DO NOT call
-//                                        // 🛑 DO NOT call event.changes.forEach { it.consume() }
-//                                        // Consuming it stops propagation
-//                                    }
-//                                }
-//                            }
-//                            .pointerInteropFilter { motionEvent ->
-//                                // We will forward the event and still allow compose to handle it if needed.
-//                                // Return true if you want to consume it in Compose, false if not.
-//                                forwardMotionEventToUnderlyingViews(context, motionEvent)
-//                                // IMPORTANT: returning false lets Compose continue to pass the event
-//                                // through (so the touch can reach underlying Compose elements if the overlay
-//                                // doesn't intercept), but we've already forwarded the event manually.
-//                                false
-//                            }
-//                            .pointerInput(Unit) {
-//                                awaitPointerEventScope {
-//                                    while (true) {
-//                                        val event = awaitPointerEvent()
-//                                        val position = event.changes.first().position
-//                                        // Send event manually to underlying view
-//                                        sendTouchToUnderlyingView(context, position)
-//                                        // Don’t consume event
-//                                        event.changes.forEach { it.consume() }
-//                                    }
-//                                }
-//                            }
-                            .pointerInput(Unit) {
-                                detectTapGestures { offset ->
-                                    viewModel.nextTrainingStep()
-                                }
-                            }
                     )
                     if (!currentStep.instructions.isNullOrEmpty()) {
                         InstructionsSection(currentStep.instructions, ttsManager)
@@ -380,7 +333,6 @@ private fun getCutoutShape(
                     )
                 )
             }
-
             "rounded" -> {
                 val cornerRadius = highlightedElement.borderRadius ?: with(density) { 8.dp.toPx() }
                 addRoundRect(

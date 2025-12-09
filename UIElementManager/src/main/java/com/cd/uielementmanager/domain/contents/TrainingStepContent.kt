@@ -9,5 +9,6 @@ internal data class TrainingStepContent(
     val stepNumber: Int?,
     val screenName: String,
     val highlightedElementContent: HighlightedElementContent,
-    val instructions: List<String>?
+    val instructions: List<String>?,
+    val flowId: String?
 )
