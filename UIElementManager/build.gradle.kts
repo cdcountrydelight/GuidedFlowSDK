@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
+    id("maven-publish")
 }
 
 android {
@@ -35,7 +37,28 @@ android {
     buildFeatures {
         compose = true
     }
+
+//    publishing {
+//        singleVariant("release") {
+//            withSourcesJar()
+//        }
+//    }
+
 }
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                groupId = "com.github.cdcountrydelight"
+                artifactId = "GuidedSDK"
+                version = "1.0.0"
+                from(components["release"])
+            }
+        }
+    }
+}
+
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -43,39 +66,32 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
+    api(libs.kotlinx.serialization.json)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    
-//    // Dependency Injection
-//    implementation(libs.koin.android)
-//    implementation(libs.koin.androidx.compose)
-    
     // Networking - Retrofit
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
     implementation(libs.gson)
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging)
-    
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
-    
     // View-based UI components
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-
     //chucker
     debugImplementation (libs.chucker.debug)
     releaseImplementation (libs.chucker.release)
     //kotlin serialization
     api(libs.kotlinx.serialization.json)
-//    //lifecycle service
-//    implementation(libs.androidx.lifecycle.service)
-    
+    //compose navigation
+    implementation(libs.androidx.navigation.compose)
+    //test
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

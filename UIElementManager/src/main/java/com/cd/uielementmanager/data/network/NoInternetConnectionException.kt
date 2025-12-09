@@ -1,3 +1,5 @@
 package com.cd.uielementmanager.data.network
 
-internal class NoInternetConnectionException : Exception("No internet connection available")
+import java.io.IOException
+
+internal class NoInternetConnectionException : IOException("No internet connection available")

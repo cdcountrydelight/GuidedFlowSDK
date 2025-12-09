@@ -1,6 +1,6 @@
 package com.cd.uielementmanager.presentation.utils
 
-  sealed class DataUiResponseStatus<out T> {
+sealed class DataUiResponseStatus<out T> {
     class None<T> : DataUiResponseStatus<T>()
 
     class Loading<T> : DataUiResponseStatus<T>()

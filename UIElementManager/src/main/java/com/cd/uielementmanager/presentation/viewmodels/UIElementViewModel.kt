@@ -1,13 +1,9 @@
-package com.cd.uielementmanager.presentation.composables
+package com.cd.uielementmanager.presentation.viewmodels
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.view.View
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Rect
-import androidx.core.graphics.createBitmap
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cd.uielementmanager.data.network.HttpClientManager
 import com.cd.uielementmanager.domain.contents.BoundsContent
@@ -23,14 +19,12 @@ import com.cd.uielementmanager.domain.use_cases.SendUIElementsUseCase
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.mapToDataUiResponseStatus
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -44,38 +38,42 @@ import java.io.FileOutputStream
  * ViewModel for UI element tracking following clean architecture
  * Matches the pattern from training flow feature
  */
-class UIElementViewModel() : ViewModel() {
+
+
+class UIElementViewModel : BaseViewModel() {
 
     // State flows for tracked elements - organized by screen name
     private val _trackedElements =
         MutableStateFlow<Map<String, Map<String, UIElementContent>>>(emptyMap())
 
-    val trackedElements: StateFlow<Map<String, Map<String, UIElementContent>>> =
+    internal val trackedElements: StateFlow<Map<String, Map<String, UIElementContent>>> =
         _trackedElements.asStateFlow()
+
 
     private val _sendUiElementsStateFlow: MutableStateFlow<DataUiResponseStatus<Unit>> =
         MutableStateFlow(DataUiResponseStatus.Companion.none())
 
-    val sendUiElementsStateFlow = _sendUiElementsStateFlow.asStateFlow()
+    internal val sendUiElementsStateFlow = _sendUiElementsStateFlow.asStateFlow()
 
     // Training flow state management
     private val _trainingFlowStateFlow =
         MutableStateFlow<DataUiResponseStatus<Unit>>(DataUiResponseStatus.none())
 
-    val trainingFlowState = _trainingFlowStateFlow.asStateFlow()
+    internal val trainingFlowState = _trainingFlowStateFlow.asStateFlow()
 
     // Current training step index
     private val _currentStepIndex = MutableStateFlow(0)
 
-    val currentStepIndex = _currentStepIndex.asStateFlow()
+    internal val currentStepIndex = _currentStepIndex.asStateFlow()
 
     private var currentScreen: String? = null
 
     private var trainingFlowResponseMap = mutableMapOf<String, List<TrainingStepContent>>()
 
-    var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
+    internal var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
 
-    fun setCurrentScreen(screen: String) {
+
+    internal fun setCurrentScreen(screen: String) {
         val previousScreen = currentScreen
         currentScreen = screen
         viewModelScope.launch {
@@ -88,7 +86,7 @@ class UIElementViewModel() : ViewModel() {
         }
     }
 
-    fun clearElementsForScreen(screen: String) {
+    private fun clearElementsForScreen(screen: String) {
         _trackedElements.update { screenMap ->
             screenMap - screen
         }
@@ -108,7 +106,7 @@ class UIElementViewModel() : ViewModel() {
      * @param tag Unique identifier for the UI element
      * @param bounds Complete position and size information
      */
-    fun registerElement(elementScreenName: String, tag: String, bounds: Rect) {
+    internal fun registerElement(elementScreenName: String, tag: String, bounds: Rect) {
         val currentScreenName = currentScreen ?: return
         if (elementScreenName != currentScreenName) {
             return
@@ -130,7 +128,7 @@ class UIElementViewModel() : ViewModel() {
     /**
      * Get tracked elements for the current screen
      */
-    fun getTrackedElements(): Map<String, UIElementContent> {
+    internal fun getTrackedElements(): Map<String, UIElementContent> {
         val screenName = currentScreen ?: return emptyMap()
         return _trackedElements.value[screenName] ?: emptyMap()
     }
@@ -139,7 +137,7 @@ class UIElementViewModel() : ViewModel() {
     /**
      * Extract and send UI data to server using clean architecture
      */
-    fun sendUIElements(context: Context, rootView: View, packageName: String) {
+    internal fun sendUIElements(context: Context, imageBitmap: Bitmap, packageName: String) {
         val currentScreen = currentScreen
         if (_sendUiElementsStateFlow.value is DataUiResponseStatus.Loading || currentScreen == null) {
             return
@@ -165,7 +163,7 @@ class UIElementViewModel() : ViewModel() {
                                 AppErrorCodes.UNKNOWN_ERROR
                             )
                         } else {
-                            val screenshotFile = captureScreenshot(rootView, context)
+                            val screenshotFile = createFileFromBitmap(imageBitmap, context)
                             val screenshotPart = MultipartBody.Part.createFormData(
                                 "screenshot",
                                 screenshotFile.name,
@@ -221,43 +219,16 @@ class UIElementViewModel() : ViewModel() {
         return screenInfoJson.toRequestBody("text/plain".toMediaType())
     }
 
-    private suspend fun captureScreenshot(view: View, context: Context): File =
-        withContext(Dispatchers.Main) {
-            val bitmap = createBitmap(view.width, view.height)
-            val canvas = Canvas(bitmap)
-            view.draw(canvas)
-            withContext(Dispatchers.IO) {
-                val timestamp = System.currentTimeMillis()
-                val file = File(context.cacheDir, "screenshot_$timestamp.png")
-                FileOutputStream(file).use { out ->
-                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-                }
-                file
-            }
-        }
-
-    /**
-     * Clear tracked elements for a specific screen or the current screen
-     * @param screenName Optional screen name to clear. If null, clears current screen
-     */
-    fun clearTrackedElements(screenName: String? = null) {
-        val screen = screenName ?: currentScreen ?: return
-        _trackedElements.update { screenMap ->
-            screenMap - screen
-        }
-        _sendUiElementsStateFlow.value = DataUiResponseStatus.none()
-    }
-
     /**
      * Fetch training flow data from server
      * @param context Application context
      */
-    fun fetchTrainingFlow(context: Context, packageName: String) {
+    internal fun fetchTrainingFlow(context: Context, packageName: String, authToken: String) {
         viewModelScope.launch {
             _trainingFlowStateFlow.value = DataUiResponseStatus.loading()
             try {
                 val getTrainingFlowUseCase = GetTrainingFlowUseCase()
-                val response = getTrainingFlowUseCase.invoke(context, packageName)
+                val response = getTrainingFlowUseCase.invoke(context, packageName, authToken)
                     .mapToDataUiResponseStatus()
                 // Reset step index when new flow is loaded
                 if (response is DataUiResponseStatus.Success) {
@@ -292,5 +263,14 @@ class UIElementViewModel() : ViewModel() {
     override fun onCleared() {
         HttpClientManager.clearInstance()
         super.onCleared()
+    }
+
+    private fun createFileFromBitmap(bitmap: Bitmap, context: Context): File {
+        val timestamp = System.currentTimeMillis()
+        val file = File(context.cacheDir, "screenshot_$timestamp.png")
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
+        return file
     }
 }

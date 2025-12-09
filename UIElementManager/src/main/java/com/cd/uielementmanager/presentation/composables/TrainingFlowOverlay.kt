@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.graphics.Color
@@ -60,6 +60,7 @@ import com.cd.uielementmanager.domain.contents.TrainingStepContent
 import com.cd.uielementmanager.domain.contents.UIElementContent
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.TextToSpeechManager
+import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 import kotlinx.coroutines.delay
 import kotlin.math.abs
 import kotlin.math.min
@@ -112,23 +113,6 @@ private fun HandleTrainingFowResponse(
     }
 }
 
-fun isInsideCutoutArea(
-    position: Offset,
-    elementToHighlight: UIElementContent,
-    density: Density
-): Boolean {
-    val elementLeft = elementToHighlight.bounds.position.x
-    val elementTop = elementToHighlight.bounds.position.y
-    val elementRight = elementLeft + elementToHighlight.bounds.size.width
-    val elementBottom = elementTop + elementToHighlight.bounds.size.height
-
-    println("Touch at: ${position.x}, ${position.y}")
-    println("Element bounds: left=$elementLeft, top=$elementTop, right=$elementRight, bottom=$elementBottom")
-
-    return position.x >= elementLeft && position.x <= elementRight &&
-            position.y >= elementTop && position.y <= elementBottom
-}
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun StepDetails(
@@ -141,7 +125,7 @@ private fun StepDetails(
     val trackedElements by viewModel.trackedElements.collectAsStateWithLifecycle()
     val density = LocalDensity.current
     val currentStep = steps.getOrNull(currentStepIndex)
-    if (currentStep != null && currentStep.highlightedElementContent!=null) {
+    if (currentStep != null) {
         val currentScreenElements = trackedElements[currentStep.screenName]
         val elementToHighlight =
             currentScreenElements?.get("back_button")
@@ -224,18 +208,11 @@ private fun StepDetails(
 //                                    }
 //                                }
 //                            }
-
-//                            .pointerInput(Unit) {
-//                                detectTapGestures { offset ->
-//                                    sendTouchToUnderlyingView(
-//                                        context = context,
-//                                        offset = offset,
-//                                        highlightX = xDp,
-//                                        highlightY = yDp
-//                                    )
-//                                    viewModel.nextTrainingStep()
-//                                }
-//                            }
+                            .pointerInput(Unit) {
+                                detectTapGestures { offset ->
+                                    viewModel.nextTrainingStep()
+                                }
+                            }
                     )
                     if (!currentStep.instructions.isNullOrEmpty()) {
                         InstructionsSection(currentStep.instructions, ttsManager)
@@ -349,7 +326,10 @@ private fun InstructionsSection(instructions: List<String>, ttsManager: TextToSp
     }
 }
 
-private fun getBorderShape(density: Density, highlightedElement: HighlightedElementContent?): Shape {
+private fun getBorderShape(
+    density: Density,
+    highlightedElement: HighlightedElementContent?
+): Shape {
     val borderRadiusDp = highlightedElement?.borderRadius?.let {
         with(density) { it.toDp() }
     } ?: 8.dp

@@ -1,5 +1,6 @@
-package com.cd.uielementmanager.service
+package com.cd.uielementmanager.presentation.service
 
+import android.app.Activity
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -35,6 +36,7 @@ class UIElementTrackingService : Service() {
     }
 
     private lateinit var overlayManager: TrackingOverlayManager
+
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     override fun onCreate() {
@@ -52,9 +54,18 @@ class UIElementTrackingService : Service() {
             }
 
             else -> {
-                val packageName = intent?.getStringExtra("packageName") ?: this.packageName
-                instance?.overlayManager?.setPackageName(packageName)
                 startForeground(NOTIFICATION_ID, createNotification())
+                val packageName = intent?.getStringExtra("packageName") ?: this.packageName
+                overlayManager.setPackageName(packageName)
+                val resultCode = intent?.getIntExtra("resultCode", Activity.RESULT_CANCELED)
+                    ?: return START_NOT_STICKY
+                val data = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra("data", Intent::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra("data")
+                } ?: return START_NOT_STICKY
+                overlayManager.setMediaProjectionData(resultCode, data)
                 overlayManager.showOverlay()
             }
         }
@@ -67,6 +78,7 @@ class UIElementTrackingService : Service() {
 
     override fun onDestroy() {
         overlayManager.hideOverlay()
+        overlayManager.releaseMediaProjection()
         serviceScope.cancel()
         instance = null
     }

@@ -10,7 +10,6 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import okhttp3.ResponseBody
 import retrofit2.Response
-import java.io.IOException
 
 internal object NetworkCallHelper {
 
@@ -113,11 +112,6 @@ internal object NetworkCallHelper {
         return when (exception) {
             is NoInternetConnectionException -> NetworkError(
                 "",
-                AppErrorCodes.NO_INTERNET_CONNECTION_ERROR
-            )
-
-            is IOException -> NetworkError(
-                "Network connection error",
                 AppErrorCodes.NO_INTERNET_CONNECTION_ERROR
             )
 

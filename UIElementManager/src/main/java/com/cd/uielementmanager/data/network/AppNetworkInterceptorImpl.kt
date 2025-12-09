@@ -16,11 +16,13 @@ internal class AppNetworkInterceptorImpl(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val newRequest = chain.request().newBuilder()
-            .addHeader(
-                "Authorization",
-                "Bearer $authToken"
-            ).build()
+        val newRequest = if (authToken != null) {
+            chain.request().newBuilder()
+                .addHeader(
+                    "Authorization",
+                    "Bearer $authToken"
+                ).build()
+        } else chain.request()
         if (!context.isNetworkAvailable()) {
             throw NoInternetConnectionException()
         }

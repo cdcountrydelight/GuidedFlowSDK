@@ -10,6 +10,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 
 /**
  * Composition local for accessing the UIElementTrackerViewModel
@@ -27,11 +28,9 @@ val LocalUIElementViewModel = compositionLocalOf<UIElementViewModel?> { null }
 @Composable
 fun Modifier.trackElement(screenName: String, tag: String): Modifier {
     val elementTracker = LocalUIElementViewModel.current
-
     if (elementTracker == null) {
         return this
     }
-
     return this
         .semantics {
             testTag = "ui_element_${screenName}_$tag"

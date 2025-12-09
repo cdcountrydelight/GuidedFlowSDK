@@ -1,6 +1,6 @@
 package com.cd.extracttagapp.di
 
-import com.cd.uielementmanager.presentation.composables.UIElementViewModel
+import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 import org.koin.dsl.module
 
 /** * Koin module for UI element extraction dependency injection
