@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity(), KoinComponent {
                 FlowListNavHost(
                     "CD Partner",
                     "deliveryapp.countrydelight.in.deliveryapp",
-                    authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzY0OTI5MzkyLCJpYXQiOjE3NjQ4NDI5OTJ9.wbUGjntmq5jBk05y4S28_joM60sg85SNHZgJt35vtYk",
+                    authToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjo1NDIxMiwiZXhwIjoxNzY1MzQ4NDEzLCJpYXQiOjE3NjUyNjIwMTN9.lXbAugDJnivCHpTaKV7GWLOqfSjM3dt3Ark4iBBShxM",
                     onClosed = { finish() },
                     isProdEnv = false
                 )
