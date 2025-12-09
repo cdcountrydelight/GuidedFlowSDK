@@ -8,11 +8,11 @@ import com.cd.uielementmanager.data.network.HttpClientManager
 import com.cd.uielementmanager.domain.contents.CompleteFlowResponseContent
 import com.cd.uielementmanager.domain.contents.CompleteQnAContent
 import com.cd.uielementmanager.domain.contents.CompleteQnaResponseContent
-import com.cd.uielementmanager.domain.contents.FlowListResponseContent
 import com.cd.uielementmanager.domain.contents.QnaResponseContent
+import com.cd.uielementmanager.domain.contents.TrainingFlowContent
 import com.cd.uielementmanager.domain.use_cases.CompleteQnAUseCase
-import com.cd.uielementmanager.domain.use_cases.GetFlowsListUseCase
 import com.cd.uielementmanager.domain.use_cases.GetQnAUseCase
+import com.cd.uielementmanager.domain.use_cases.GetTrainingFlowUseCase
 import com.cd.uielementmanager.domain.use_cases.TrainingCompletedUseCase
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.mapToDataUiResponseStatus
@@ -21,10 +21,10 @@ import kotlinx.coroutines.flow.asStateFlow
 
 class QuizViewModel : BaseViewModel() {
 
-    private val _flowsListDetailStateFlow: MutableStateFlow<DataUiResponseStatus<List<FlowListResponseContent>>> =
+    private val _flowsListDetailStateFlow: MutableStateFlow<DataUiResponseStatus<List<TrainingFlowContent>>> =
         MutableStateFlow(DataUiResponseStatus.none())
 
-    val flowsListDetailStateFlow = _flowsListDetailStateFlow.asStateFlow()
+    internal val flowsListDetailStateFlow = _flowsListDetailStateFlow.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
 
@@ -61,8 +61,7 @@ class QuizViewModel : BaseViewModel() {
         _flowsListDetailStateFlow.value = DataUiResponseStatus.loading()
         backgroundCall {
             _flowsListDetailStateFlow.value =
-                GetFlowsListUseCase().invoke(context, packageName)
-                    .mapToDataUiResponseStatus()
+                GetTrainingFlowUseCase().invoke(context, packageName).mapToDataUiResponseStatus()
         }
     }
 
@@ -73,8 +72,8 @@ class QuizViewModel : BaseViewModel() {
     fun refreshFlowsList(context: Context, packageName: String) {
         _isRefreshing.value = true
         backgroundCall {
-            val result = GetFlowsListUseCase().invoke(context, packageName)
-                .mapToDataUiResponseStatus()
+            val result =
+                GetTrainingFlowUseCase().invoke(context, packageName).mapToDataUiResponseStatus()
             _flowsListDetailStateFlow.value = result
             _isRefreshing.value = false
         }

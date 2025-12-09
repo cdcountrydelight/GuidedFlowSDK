@@ -5,7 +5,6 @@ import com.cd.uielementmanager.data.entities.CompleteQuestionsRequestEntity
 import com.cd.uielementmanager.data.entities.PackageNameResponse
 import com.cd.uielementmanager.data.mappers.CompleteFlowResponseMapper
 import com.cd.uielementmanager.data.mappers.CompleteQnAResponseEntityToContentMapper
-import com.cd.uielementmanager.data.mappers.FlowListMapper
 import com.cd.uielementmanager.data.mappers.QnAResponseEntityToContentMapper
 import com.cd.uielementmanager.data.mappers.TrainingFlowMapper
 import com.cd.uielementmanager.data.network.NetworkCallHelper.networkCall
@@ -15,7 +14,6 @@ import com.cd.uielementmanager.data.network.UIElementsApiService
 import com.cd.uielementmanager.domain.contents.CompleteFlowResponseContent
 import com.cd.uielementmanager.domain.contents.CompleteQnAContent
 import com.cd.uielementmanager.domain.contents.CompleteQnaResponseContent
-import com.cd.uielementmanager.domain.contents.FlowListResponseContent
 import com.cd.uielementmanager.domain.contents.QnaResponseContent
 import com.cd.uielementmanager.domain.contents.TrainingFlowContent
 import com.cd.uielementmanager.domain.domain_utils.AppErrorCodes
@@ -51,33 +49,16 @@ internal class UIElementsRepositoryImpl(private val apiService: UIElementsApiSer
         }
     }
 
-    override suspend fun getFlowsList(packageName: String): DataResponseStatus<List<FlowListResponseContent>> {
-        val mapper = FlowListMapper()
-        val response = networkCall(mapper) {
-            apiService.getFlowList(packageName = packageName)
-        }
-
-        return when (response) {
-            is DataResponseStatus.Success -> {
-                val data = response.data
-                if (data.isEmpty()) {
-                    DataResponseStatus.failure(
-                        "No active flows found",
-                        AppErrorCodes.UNKNOWN_ERROR
-                    )
-                } else {
-                    DataResponseStatus.success(data)
-                }
-            }
-
-            is DataResponseStatus.Failure -> response
-        }
-    }
-
 
     override suspend fun sendPackageName(packageName: String): DataResponseStatus<PackageNameResponse> {
         return networkCall {
             apiService.uploadPackageName(packageName)
+        }
+    }
+
+    override suspend fun startFlow(flowId: String): DataResponseStatus<Unit> {
+        return networkCall {
+            apiService.startFlow(flowId)
         }
     }
 
@@ -138,7 +119,6 @@ internal class UIElementsRepositoryImpl(private val apiService: UIElementsApiSer
 
     override suspend fun getTrainingFlow(
         packageName: String,
-        authToken: String,
     ): DataResponseStatus<List<TrainingFlowContent>> {
         return networkCallForList(TrainingFlowMapper()) {
             apiService.getTrainingFlow(packageName)

@@ -4,7 +4,6 @@ import com.cd.uielementmanager.data.entities.PackageNameResponse
 import com.cd.uielementmanager.domain.contents.CompleteFlowResponseContent
 import com.cd.uielementmanager.domain.contents.CompleteQnAContent
 import com.cd.uielementmanager.domain.contents.CompleteQnaResponseContent
-import com.cd.uielementmanager.domain.contents.FlowListResponseContent
 import com.cd.uielementmanager.domain.contents.QnaResponseContent
 import com.cd.uielementmanager.domain.contents.TrainingFlowContent
 import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
@@ -35,7 +34,7 @@ internal interface IUIElementsRepository {
         screenInfoPart: RequestBody,
         elementsPart: RequestBody
     ): DataResponseStatus<Unit>
-    
+
     /**
      * Get training flow data by ID
      *
@@ -45,10 +44,7 @@ internal interface IUIElementsRepository {
 
     suspend fun getQnADetails(flowId: Int): DataResponseStatus<QnaResponseContent>
 
-    //guided flow
-    suspend fun getFlowsList(packageName: String): DataResponseStatus<List<FlowListResponseContent>>
-
-    suspend fun getTrainingFlow(packageName: String, authToken: String):DataResponseStatus<List<TrainingFlowContent>>
+    suspend fun getTrainingFlow(packageName: String):DataResponseStatus<List<TrainingFlowContent>>
 
     suspend fun completeQnA(
         flowId: Int,
@@ -57,5 +53,6 @@ internal interface IUIElementsRepository {
 
     suspend fun completeTraining(flowId: Int): DataResponseStatus<CompleteFlowResponseContent>
 
+    suspend fun startFlow(flowId: String): DataResponseStatus<Unit>
 
 }

@@ -16,6 +16,7 @@ import com.cd.uielementmanager.domain.domain_utils.DataResponseStatus
 import com.cd.uielementmanager.domain.use_cases.GetTrainingFlowUseCase
 import com.cd.uielementmanager.domain.use_cases.SendPackageNameUseCase
 import com.cd.uielementmanager.domain.use_cases.SendUIElementsUseCase
+import com.cd.uielementmanager.domain.use_cases.StartFlowUseCase
 import com.cd.uielementmanager.presentation.utils.DataUiResponseStatus
 import com.cd.uielementmanager.presentation.utils.FunctionHelper.mapToDataUiResponseStatus
 import com.google.gson.Gson
@@ -72,14 +73,22 @@ class UIElementViewModel : BaseViewModel() {
 
     internal var currentScreenStepsList = mutableStateListOf<TrainingStepContent>()
 
+    internal var alreadyStartedFlows = mutableSetOf<String>()
 
-    internal fun setCurrentScreen(screen: String) {
+
+    internal var removeStatusBarHeight = false
+
+    internal fun setCurrentScreen(screen: String, context: Context) {
         val previousScreen = currentScreen
         currentScreen = screen
         viewModelScope.launch {
-            delay(200)
+            delay(300)
             currentScreenStepsList.clear()
-            currentScreenStepsList.addAll(trainingFlowResponseMap[screen] ?: arrayListOf())
+            val currentSteps = trainingFlowResponseMap[screen] ?: arrayListOf()
+            currentScreenStepsList.addAll(currentSteps)
+            if (currentSteps.isNotEmpty()) {
+                startFlow(currentSteps.getOrNull(0)?.flowId, context)
+            }
         }
         if (previousScreen != null && previousScreen != screen) {
             clearElementsForScreen(previousScreen)
@@ -134,6 +143,18 @@ class UIElementViewModel : BaseViewModel() {
     }
 
 
+    internal fun startFlow(flowId: String?, context: Context) {
+        if (flowId == null) return
+        backgroundCall {
+            if (alreadyStartedFlows.contains(flowId)) return@backgroundCall
+            val response = StartFlowUseCase().invoke(flowId, context)
+            if (response is DataResponseStatus.Success) {
+                alreadyStartedFlows.add(flowId)
+            }
+        }
+    }
+
+
     /**
      * Extract and send UI data to server using clean architecture
      */
@@ -143,7 +164,7 @@ class UIElementViewModel : BaseViewModel() {
             return
         }
         _sendUiElementsStateFlow.value = DataUiResponseStatus.loading()
-        viewModelScope.launch {
+        backgroundCall {
             _sendUiElementsStateFlow.value = try {
                 val sendPackageNameUseCase = SendPackageNameUseCase()
                 val response = sendPackageNameUseCase.invoke(packageName, context)
@@ -223,12 +244,12 @@ class UIElementViewModel : BaseViewModel() {
      * Fetch training flow data from server
      * @param context Application context
      */
-    internal fun fetchTrainingFlow(context: Context, packageName: String, authToken: String) {
-        viewModelScope.launch {
+    internal fun fetchTrainingFlow(context: Context, packageName: String) {
+        backgroundCall {
             _trainingFlowStateFlow.value = DataUiResponseStatus.loading()
             try {
                 val getTrainingFlowUseCase = GetTrainingFlowUseCase()
-                val response = getTrainingFlowUseCase.invoke(context, packageName, authToken)
+                val response = getTrainingFlowUseCase.invoke(context, packageName)
                     .mapToDataUiResponseStatus()
                 // Reset step index when new flow is loaded
                 if (response is DataUiResponseStatus.Success) {

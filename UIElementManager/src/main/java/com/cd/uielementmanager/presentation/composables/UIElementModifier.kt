@@ -1,15 +1,20 @@
 package com.cd.uielementmanager.presentation.composables
 
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.cd.uielementmanager.presentation.viewmodels.UIElementViewModel
 
 /**
@@ -27,8 +32,9 @@ val LocalUIElementViewModel = compositionLocalOf<UIElementViewModel?> { null }
  */
 @Composable
 fun Modifier.trackElement(screenName: String, tag: String): Modifier {
-    val elementTracker = LocalUIElementViewModel.current
-    if (elementTracker == null) {
+    val view = LocalView.current
+    val uIElementViewModel = LocalUIElementViewModel.current
+    if (uIElementViewModel == null) {
         return this
     }
     return this
@@ -37,21 +43,27 @@ fun Modifier.trackElement(screenName: String, tag: String): Modifier {
         }
         .onGloballyPositioned { coordinates ->
             if (coordinates.isAttached) {
-                val bounds = coordinates.boundsInWindow()
-                elementTracker.registerElement(screenName, tag, bounds)
+                val bounds = coordinates.boundsInWindow(uIElementViewModel.removeStatusBarHeight, view)
+                uIElementViewModel.registerElement(screenName, tag, bounds)
             }
         }
 }
 
-
 /**
  * Helper extension to get bounds in window coordinates
  */
-private fun LayoutCoordinates.boundsInWindow(): Rect {
+private fun LayoutCoordinates.boundsInWindow(removeStatusBarHeight: Boolean, view: View): Rect {
     val position = positionInWindow()
     val size = size
+    val insets = ViewCompat.getRootWindowInsets(view)
+    val statusBarHeight = insets?.getInsets(WindowInsetsCompat.Type.statusBars())?.top ?: 0
+    val adjustedY = if (removeStatusBarHeight) {
+        position.y - statusBarHeight
+    } else {
+        position.y
+    }
     return Rect(
-        offset = position,
+        offset = Offset(position.x, adjustedY),
         size = Size(width = size.width.toFloat(), height = size.height.toFloat())
     )
 }

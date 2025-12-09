@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName
 /**
  * Data layer entity for highlighted element - represents API response structure
  */
+
 internal data class HighlightedElementEntity(
     @SerializedName("tag")
     val elementId: String?,

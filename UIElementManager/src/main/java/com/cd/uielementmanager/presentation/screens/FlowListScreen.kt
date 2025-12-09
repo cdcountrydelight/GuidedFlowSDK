@@ -54,7 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cd.uielementmanager.R
-import com.cd.uielementmanager.domain.contents.FlowListResponseContent
+import com.cd.uielementmanager.domain.contents.TrainingFlowContent
 import com.cd.uielementmanager.presentation.beans.ButtonHandlerBean
 import com.cd.uielementmanager.presentation.composables.EmptySection
 import com.cd.uielementmanager.presentation.composables.ErrorAlertDialog
@@ -167,7 +167,7 @@ private fun HandleFlowListStateFlow(
 @Composable
 private fun FlowsList(
     appName: String,
-    flows: List<FlowListResponseContent>,
+    flows: List<TrainingFlowContent>,
     viewModel: QuizViewModel,
     packageName: String,
     onFlowSelected: () -> Unit,
@@ -249,7 +249,6 @@ private fun FlowsList(
                         flow.userProgress?.isStarted = true
                         viewModel.setSelectedFlow(flow.id)
                         onFlowSelected()
-
                     }
                 )
             }
@@ -331,7 +330,7 @@ private fun HeaderSection(appName: String, modifier: Modifier) {
 
 
 @Composable
-private fun StatusCard(flows: List<FlowListResponseContent>) {
+private fun StatusCard(flows: List<TrainingFlowContent>) {
     var height by remember {
         mutableFloatStateOf(0.0f)
     }
@@ -408,7 +407,7 @@ private fun StatusCardItemDivider() {
 
 @Composable
 private fun FlowItem(
-    flow: FlowListResponseContent,
+    flow: TrainingFlowContent,
     onClick: () -> Unit,
 ) {
     Column(

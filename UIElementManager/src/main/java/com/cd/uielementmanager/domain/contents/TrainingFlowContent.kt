@@ -8,5 +8,8 @@ internal data class TrainingFlowContent(
     val id: Int?,
     val name: String?,
     val stepCount: Int?,
-    val steps: List<TrainingStepContent>
+    val steps: List<TrainingStepContent>,
+    val description: String? = null,
+    val isActive: Boolean? = null,
+    var userProgress: UserProgressResponseContent? = null
 )
