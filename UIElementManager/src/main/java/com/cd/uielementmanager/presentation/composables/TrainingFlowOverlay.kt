@@ -167,11 +167,6 @@ private fun StepDetails(
                                 color = borderColor,
                                 shape = shape
                             )
-                            .pointerInput(Unit) {
-                                detectTapGestures {
-                                    viewModel.nextTrainingStep()
-                                }
-                            }
                     )
 
                     if (!currentStep.instructions.isNullOrEmpty()) {

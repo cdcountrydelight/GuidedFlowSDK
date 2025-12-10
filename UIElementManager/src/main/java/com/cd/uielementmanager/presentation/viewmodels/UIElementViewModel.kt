@@ -272,14 +272,6 @@ class UIElementViewModel : BaseViewModel() {
         }
     }
 
-    /**
-     * Navigate to next training step
-     */
-    fun nextTrainingStep() {
-        _currentStepIndex.update { current ->
-            if (current < currentScreenStepsList.size - 1) current + 1 else current
-        }
-    }
 
     override fun onCleared() {
         HttpClientManager.clearInstance()
